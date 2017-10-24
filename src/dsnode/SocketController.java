@@ -1,5 +1,8 @@
 package dsnode;
 
+import dsnode.model.Message;
+import dsnode.model.Node;
+
 import java.io.IOException;
 import java.net.*;
 
@@ -12,7 +15,7 @@ class SocketController {
 
     private String localIp;
     private int localPort;
-    private String localnName;
+    private String localName;
 
     private DatagramSocket datagramSocket;
 
@@ -26,7 +29,7 @@ class SocketController {
 
             this.localIp = Inet4Address.getLocalHost().getHostAddress();
             this.localPort = datagramSocket.getLocalPort();
-            this.localnName = localName;
+            this.localName = localName;
 
             logger.log("Socket open at the port " + datagramSocket.getLocalPort());
 
@@ -56,21 +59,26 @@ class SocketController {
 
     /**
      *
-     * @return string containing the message sent by remote node
+     * @return Message object containing the message sent by remote node and its address
      */
-    String receiveMessage(){
+    Message receiveMessage(){
 
         byte[] buffer = new byte[65536];
-        DatagramPacket serverReplyPacket = new DatagramPacket(buffer, buffer.length);
+        DatagramPacket replyPacket = new DatagramPacket(buffer, buffer.length);
+        String remoteIp = "";
+        int remotePort = 0;
 
         try {
-            datagramSocket.receive(serverReplyPacket);
+            datagramSocket.receive(replyPacket);
+
+            remotePort  = replyPacket.getPort();
+            remoteIp = replyPacket.getAddress().getHostAddress();
         }catch (IOException e){
             logger.log("Receiving message error..!");
         }
 
-        byte[] data = serverReplyPacket.getData();
-        return new String(data, 0, serverReplyPacket.getLength());
+        byte[] data = replyPacket.getData();
+        return new Message(new String(data, 0, replyPacket.getLength()), new Node(remoteIp, remotePort));
     }
 
     /**
@@ -78,22 +86,6 @@ class SocketController {
      * @return a Node object containing the details of current node.
      */
     Node getLocalNode(){
-        return new Node(localIp, localPort, localnName);
-    }
-
-    /**
-     *
-     * @return Ip address of the local socket connection
-     */
-    String getLocalIp() {
-        return localIp;
-    }
-
-    /**
-     *
-     * @return port number of the local socket connection
-     */
-    int getLocalPort() {
-        return localPort;
+        return new Node(localIp, localPort, localName);
     }
 }

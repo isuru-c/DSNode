@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *
  * @author Isuru Chandima
  */
 class Logger {
@@ -33,7 +32,7 @@ class Logger {
         if (logType == STD_OUT) {
             // Write log status to the std_out
 
-            System.out.println(dateFormat.format(date) + " - " + message);
+            System.out.print(String.format("%s - %s\n# ",dateFormat.format(date), message));
         }
         if (logType == FILE_OUT) {
             // Write log status to a file

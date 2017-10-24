@@ -1,9 +1,12 @@
 package dsnode;
 
+import dsnode.model.NeighbourTable;
+import dsnode.model.Node;
+
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
- *
  * @author Isuru Chandima
  */
 public class DSNode {
@@ -12,21 +15,37 @@ public class DSNode {
 
     public static void main(String[] args) {
 
+        DSNode dsNode = new DSNode();
+        dsNode.startNode();
+
+    }
+
+    void startNode() {
         logger.useLogger(true);
 
-        String BServerIp = "127.0.0.1";
-        int BServerPort = 55555;
+        Scanner scanner = new Scanner(System.in);
 
-        String localName = "ic2";
+        String bServerIp = "127.0.0.1";
+        int bServerPort = 55555;
+
+        System.out.print("Enter the name of the node: ");
+        String localName = scanner.next();
 
         SocketController socketController = new SocketController(localName);
+
         Node localNode = socketController.getLocalNode();
-        Node serverNode = new Node(BServerIp, BServerPort);
+        Node serverNode = new Node(bServerIp, bServerPort);
 
         BSServer bServer = new BSServer(serverNode, localNode, socketController);
         ArrayList<Node> nodeList = bServer.getNodeList();
 
-        ArrayList<Node> neighbourList = new ArrayList<>();
+        NeighbourTable neighbourTable = new NeighbourTable();
+
+        MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable);
+        messageReceiver.start();
+
+        ConsoleListener consoleListener = new ConsoleListener(neighbourTable);
+        consoleListener.start();
 
         if (nodeList.size() == 0) {
             // No other node, this is the first node of the network
@@ -43,9 +62,9 @@ public class DSNode {
                 logger.log(String.format("Joining to a node [%s]", joinMessage));
                 socketController.sendMessage(joinMessage, node);
 
+                node.setStatus(Node.INITIAL_STATUS);
+                neighbourTable.addNeighbour(node);
             }
         }
-
-
     }
 }

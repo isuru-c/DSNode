@@ -1,5 +1,7 @@
 package dsnode;
 
+import dsnode.model.Node;
+
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -47,12 +49,12 @@ class BSServer {
         socketController.sendMessage(regMessage, serverNode);
         logger.log("Register request message is sent to BS");
 
-        String replyMsg = socketController.receiveMessage();
+        String replyMsg = socketController.receiveMessage().getMessage();
         logger.log("Register response message received from BS [" + replyMsg + "]");
 
         StringTokenizer st = new StringTokenizer(replyMsg, " ");
 
-        // Get first two tokens to remove length and comman parts from the message
+        // Get first two tokens to remove length and common parts from the message
         // String length = st.nextToken();
         // String command = st.nextToken();
 
