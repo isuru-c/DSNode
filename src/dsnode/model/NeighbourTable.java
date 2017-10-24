@@ -43,4 +43,16 @@ public class NeighbourTable {
     public boolean isLocalNode(Node sourceNode) {
         return sourceNode.getIp().equals(localNode.getIp()) && sourceNode.getPort() == localNode.getPort();
     }
+
+    public void removeNeighbour(Node neighbour) {
+
+        for (Node node : neighbourList) {
+            if (node.getIp().equals(neighbour.getIp()) && node.getPort() == neighbour.getPort()){
+                neighbourList.removeFirstOccurrence(node);
+
+                break;
+            }
+
+        }
+    }
 }

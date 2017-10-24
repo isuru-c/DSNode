@@ -44,7 +44,7 @@ public class DSNode {
         MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable);
         messageReceiver.start();
 
-        ConsoleListener consoleListener = new ConsoleListener(neighbourTable);
+        ConsoleListener consoleListener = new ConsoleListener(neighbourTable, socketController, serverNode);
         consoleListener.start();
 
         if (nodeList.size() == 0) {

@@ -51,6 +51,8 @@ class MessageReceiver extends Thread {
                     handleUNROK(st);
                 } else if ("LEAVEOK".equals(command)) {
                     handleLEAVEOK(st);
+                } else if ("LEAVE".equals(command)) {
+                    handleLEAVE(st);
                 } else if ("JOIN".equals(command)) {
                     handleJOIN(st);
                 } else if ("JOINOK".equals(command)) {
@@ -84,12 +86,57 @@ class MessageReceiver extends Thread {
 
     private void handleUNROK(StringTokenizer tokenizeMessage) {
 
+        if (tokenizeMessage.countTokens() < 1) {
+            logger.log(String.format("Incomplete message for JOIN request []"));
+            return;
+        }
+
+        String value = tokenizeMessage.nextToken();
+
+        if ("0".equals(value)) {
+            // Successful unregister from the BS server
+            logger.log("Successfully unregistered from the BS server");
+
+        } else if ("9999".equals(value)) {
+            // Error while unregister from BS server
+            logger.log("Error in JOINOK message response...!");
+        }
+
+    }
+
+    private void handleLEAVE(StringTokenizer tokenizeMessage) {
+
+        if (tokenizeMessage.countTokens() < 2) {
+            logger.log("Incomplete message for LEAVE request...!");
+            return;
+        }
+
+        // Create Node object for the leaving node
+        String nodeIp = tokenizeMessage.nextToken();
+        int nodePort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node neighbour = new Node(nodeIp, nodePort);
+
+        int value = 0;
+
+        if (neighbourTable.isExistingNeighbour(neighbour)) {
+            logger.log(String.format("Neighbour [] leave the system", neighbourTable.getNeighbourNode(neighbour).getNodeName()));
+            neighbourTable.removeNeighbour(neighbour);
+        } else {
+            value = 9999;
+            logger.log(String.format("LEAVE request from non-existing neighbours [%s-%d]", nodeIp, nodePort));
+        }
+
+        // Render and send LEAVEOK message for the leaving neighbour
+        String leaveResponseMessage = String.format("LEAVEOK %d", value);
+        leaveResponseMessage = String.format("%04d %s", (leaveResponseMessage.length() + 5), leaveResponseMessage);
+
+        socketController.sendMessage(leaveResponseMessage, neighbour);
     }
 
     private void handleLEAVEOK(StringTokenizer tokenizeMessage) {
 
         if (tokenizeMessage.countTokens() < 1) {
-            logger.log("Incomplete message for JOIN request...!");
+            logger.log("Incomplete message for LEAVEOK response...!");
             return;
         }
 
