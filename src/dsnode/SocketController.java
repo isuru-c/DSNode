@@ -20,16 +20,18 @@ class SocketController {
     private DatagramSocket datagramSocket;
 
     /**
-     *
      * @param localName Name of this node given by the user
      */
     SocketController(String localName) {
         try {
             datagramSocket = new DatagramSocket();
 
-            this.localIp = Inet4Address.getLocalHost().getHostAddress();
             this.localPort = datagramSocket.getLocalPort();
             this.localName = localName;
+
+            DatagramSocket socket = new DatagramSocket();
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            this.localIp = socket.getLocalAddress().getHostAddress();
 
             logger.log("Socket open at the port " + datagramSocket.getLocalPort());
 
@@ -41,8 +43,7 @@ class SocketController {
     }
 
     /**
-     *
-     * @param message message needs to send to the remote node
+     * @param message  message needs to send to the remote node
      * @param receiver receiver of the message
      */
     void sendMessage(String message, Node receiver) {
@@ -58,10 +59,9 @@ class SocketController {
     }
 
     /**
-     *
      * @return Message object containing the message sent by remote node and its address
      */
-    Message receiveMessage(){
+    Message receiveMessage() {
 
         byte[] buffer = new byte[65536];
         DatagramPacket replyPacket = new DatagramPacket(buffer, buffer.length);
@@ -71,9 +71,9 @@ class SocketController {
         try {
             datagramSocket.receive(replyPacket);
 
-            remotePort  = replyPacket.getPort();
+            remotePort = replyPacket.getPort();
             remoteIp = replyPacket.getAddress().getHostAddress();
-        }catch (IOException e){
+        } catch (IOException e) {
             logger.log("Receiving message error..!");
         }
 
@@ -82,10 +82,9 @@ class SocketController {
     }
 
     /**
-     *
      * @return a Node object containing the details of current node.
      */
-    Node getLocalNode(){
+    Node getLocalNode() {
         return new Node(localIp, localPort, localName);
     }
 }

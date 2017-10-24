@@ -42,7 +42,7 @@ class BSServer {
 
         ArrayList<Node> nodeList = new ArrayList<>();
 
-        String regMessage = String.format("REG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getUserName());
+        String regMessage = String.format("REG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());
         regMessage = String.format("%04d %s", (regMessage.length() + 5), regMessage);
 
         logger.log("Register request message to BS [" + regMessage + "]");
