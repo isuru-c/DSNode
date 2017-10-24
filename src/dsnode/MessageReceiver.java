@@ -55,6 +55,10 @@ class MessageReceiver extends Thread {
                     handleJOIN(st);
                 } else if ("JOINOK".equals(command)) {
                     handleJOINOK(st, sourceNode);
+                } else if ("NAME".equals(command)) {
+                    handleNAME(st, sourceNode);
+                } else if ("NAMEOK".equals(command)) {
+                    handleNAMEOK(st);
                 } else if ("SER".equals(command)) {
                     handleSER(st);
                 } else if ("SEROK".equals(command)) {
@@ -108,21 +112,37 @@ class MessageReceiver extends Thread {
             return;
         }
 
+        // Create Node object for the new neighbour
         String newNodeIp = tokenizeMessage.nextToken();
         int newNodePort = Integer.valueOf(tokenizeMessage.nextToken());
         Node newNeighbour = new Node(newNodeIp, newNodePort);
 
         int value = 0;
 
+        if (neighbourTable.isExistingNeighbour(newNeighbour)) {
+            value = 9999;
+            logger.log(String.format("JOIN request from existing neighbours [%s-%d]", newNodeIp, newNodePort));
+        }
+
+        // Render and send JOINOK message for the new neighbour
         String responseMessage = String.format("JOINOK %d", value);
         responseMessage = String.format("%04d %s", (responseMessage.length() + 5), responseMessage);
 
         socketController.sendMessage(responseMessage, newNeighbour);
 
-        newNeighbour.setStatus(Node.ACTIVE_STATUS);
-        neighbourTable.addNeighbour(newNeighbour);
-        logger.log(String.format("New neighbour added [%s-%d]", newNodeIp, newNodePort));
+        if (value == 0) {
+            newNeighbour.setStatus(Node.ACTIVE_STATUS);
+            newNeighbour.restLastSeen();
+            neighbourTable.addNeighbour(newNeighbour);
+            logger.log(String.format("New neighbour added [%s-%d]", newNodeIp, newNodePort));
 
+            // Send name request for the new node
+            String nameRequest = String.format("NAME %s %d", newNodeIp, newNodePort);
+            nameRequest = String.format("%04d %s", (nameRequest.length() + 5), nameRequest);
+
+            socketController.sendMessage(nameRequest, newNeighbour);
+            logger.log(String.format("NAME request sent [%s-%d]", newNodeIp, newNodePort));
+        }
     }
 
     private void handleJOINOK(StringTokenizer tokenizeMessage, Node sourceNode) {
@@ -137,10 +157,69 @@ class MessageReceiver extends Thread {
         if ("0".equals(value)) {
             // Successful neighbour adding in remote node, add node to the routing table
             Node node = neighbourTable.getNeighbourNode(sourceNode);
-            node.setStatus(Node.ACTIVE_STATUS);
+
+            if (node != null) {
+                node.setStatus(Node.ACTIVE_STATUS);
+                node.restLastSeen();
+            } else {
+                logger.log(String.format("Different IP/Port parameters in message and data packet [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
+                return;
+            }
+
         } else if ("9999".equals(value)) {
             // Error while adding new node to routing table
             logger.log("Error in JOINOK message response...!");
+            return;
+        }
+
+        // Send name request for the new node
+        String nameRequest = String.format("NAME %s %d", sourceNode.getIp(), sourceNode.getPort());
+        nameRequest = String.format("%04d %s", (nameRequest.length() + 5), nameRequest);
+
+        socketController.sendMessage(nameRequest, sourceNode);
+        logger.log(String.format("NAME request sent [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
+    }
+
+    private void handleNAME(StringTokenizer tokenizeMessage, Node sourceNode) {
+
+        if (tokenizeMessage.countTokens() < 2) {
+            logger.log("Incomplete message for NAME request...!");
+            return;
+        }
+
+        String nodeIp = tokenizeMessage.nextToken();
+        int nodePort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node node = new Node(nodeIp, nodePort);
+
+        // Check whether NAME request came from knowing neighbour
+        if (!neighbourTable.isLocalNode(node))
+            return;
+
+        // Send NAMEOK respond to the NAME requester
+        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, socketController.getLocalNode().getNodeName());
+        nameResponse = String.format("%04d %s", (nameResponse.length() + 5), nameResponse);
+
+        socketController.sendMessage(nameResponse, sourceNode);
+        logger.log(String.format("NAMEOK respond sent to [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
+
+    }
+
+    private void handleNAMEOK(StringTokenizer tokenizeMessage) {
+
+        if (tokenizeMessage.countTokens() < 3) {
+            logger.log("Incomplete message for NAMEOK response...!");
+            return;
+        }
+
+        String nodeIp = tokenizeMessage.nextToken();
+        int nodePort = Integer.valueOf(tokenizeMessage.nextToken());
+        String nodeName = tokenizeMessage.nextToken();
+        Node node = new Node(nodeIp, nodePort, nodeName);
+
+        if (neighbourTable.isExistingNeighbour(node)) {
+            Node neighbourNode = neighbourTable.getNeighbourNode(node);
+            neighbourNode.setNodeName(nodeName);
+            logger.log(String.format("Name updated in the node [%s-%d]", nodeIp, nodePort));
         }
     }
 
@@ -154,9 +233,5 @@ class MessageReceiver extends Thread {
 
     private void handleERROR(StringTokenizer tokenizeMessage) {
 
-    }
-
-    private boolean validateSource(Node sourceNode) {
-        return true;
     }
 }

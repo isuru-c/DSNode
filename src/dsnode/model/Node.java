@@ -8,7 +8,7 @@ public class Node {
 
     private String ip;
     private int port;
-    private String nodeName = "";
+    private String nodeName = "-ny-";
     private int lastSeen;
     private String status;
 
@@ -38,6 +38,10 @@ public class Node {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 
     public String getIp() {

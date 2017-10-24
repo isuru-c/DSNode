@@ -49,10 +49,11 @@ public class ConsoleListener extends Thread {
 
             if ("neighbours".equals(command2)) {
 
-                System.out.println("Number\tName\tIP Address\tPort\tLast Seen\tStatus");
+                System.out.println("Number\tName\t\tIP Address\t\tPort\tLast Seen\tStatus");
+                System.out.println("--------------------------------------------------------------");
                 int count = 1;
                 for (Node node : neighbourTable.getNeighbourList()) {
-                    System.out.println(String.format("%d\t%s\t%s\t%d\t%d\t%s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastSeen(), node.getLastSeen()));
+                    System.out.println(String.format("%d\t\t%s\t\t%s\t%d\t%d\t\t\t%s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastSeen(), node.getStatus()));
                     count++;
                 }
                 System.out.println();

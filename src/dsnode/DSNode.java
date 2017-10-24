@@ -39,7 +39,7 @@ public class DSNode {
         BSServer bServer = new BSServer(serverNode, localNode, socketController);
         ArrayList<Node> nodeList = bServer.getNodeList();
 
-        NeighbourTable neighbourTable = new NeighbourTable();
+        NeighbourTable neighbourTable = new NeighbourTable(localNode);
 
         MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable);
         messageReceiver.start();
