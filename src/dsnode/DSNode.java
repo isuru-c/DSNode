@@ -1,5 +1,6 @@
 package dsnode;
 
+import dsnode.model.FileHandler;
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
 
@@ -39,12 +40,14 @@ public class DSNode {
         BSServer bServer = new BSServer(serverNode, localNode, socketController);
         ArrayList<Node> nodeList = bServer.getNodeList();
 
+        FileHandler fileHandler = new FileHandler();
+
         NeighbourTable neighbourTable = new NeighbourTable(localNode);
 
         MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable);
         messageReceiver.start();
 
-        ConsoleListener consoleListener = new ConsoleListener(neighbourTable, socketController, serverNode);
+        ConsoleListener consoleListener = new ConsoleListener(neighbourTable, socketController, fileHandler, serverNode);
         consoleListener.start();
 
         if (nodeList.size() == 0) {

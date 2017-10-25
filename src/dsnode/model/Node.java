@@ -20,7 +20,7 @@ public class Node {
     public Node(String ip, int port) {
         this.ip = ip;
         this.port = port;
-        this.lastSeen = 10000;
+        this.lastSeen = 99999;
         this.status = TEMPORARY_STATUS;
     }
 
@@ -28,7 +28,7 @@ public class Node {
         this.ip = ip;
         this.port = port;
         this.nodeName = userName;
-        this.lastSeen = 10000;
+        this.lastSeen = 99999;
         this.status = TEMPORARY_STATUS;
     }
 

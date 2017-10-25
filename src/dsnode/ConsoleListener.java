@@ -1,5 +1,6 @@
 package dsnode;
 
+import dsnode.model.FileHandler;
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
 
@@ -16,11 +17,13 @@ public class ConsoleListener extends Thread {
 
     private NeighbourTable neighbourTable;
     private SocketController socketController;
+    private FileHandler fileHandler;
     private Node bsServer;
 
-    ConsoleListener(NeighbourTable neighbourTable, SocketController socketController, Node bsServer) {
+    ConsoleListener(NeighbourTable neighbourTable, SocketController socketController, FileHandler fileHandler, Node bsServer) {
         this.neighbourTable = neighbourTable;
         this.socketController = socketController;
+        this.fileHandler = fileHandler;
         this.bsServer = bsServer;
     }
 
@@ -34,7 +37,7 @@ public class ConsoleListener extends Thread {
             String command = scanner.nextLine();
             if (command.isEmpty()) {
                 System.out.print("# ");
-            }else {
+            } else {
                 processCommand(command);
             }
         }
@@ -62,15 +65,28 @@ public class ConsoleListener extends Thread {
                 }
                 System.out.println();
                 System.out.print("# ");
+            } else if ("files".equals(command2)) {
+
+                String fileList[] = fileHandler.getFileList();
+
+                System.out.println();
+                System.out.println("Number\t| File Name");
+                System.out.println("----------------------------------");
+                int count = 1;
+                for (String file : fileList) {
+                    System.out.println(String.format("  %d\t\t| %s", count, file));
+                    count++;
+                }
+                System.out.print("----------------------------------\n\n#");
             }
 
-        }else if("leave".equals(command1)){
+        } else if ("leave".equals(command1)) {
 
             Node localNode = socketController.getLocalNode();
 
             // Unregister from the Bootstrap Server
 
-            String unregRequest = String.format("UNREG %s %d %s", localNode.getIp(), localNode.getPort(),localNode.getNodeName());
+            String unregRequest = String.format("UNREG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());
             unregRequest = String.format("%04d %s", (unregRequest.length() + 5), unregRequest);
 
             socketController.sendMessage(unregRequest, bsServer);
@@ -79,7 +95,7 @@ public class ConsoleListener extends Thread {
 
             // Leave from all the neighbours
 
-            for (Node node : neighbourTable.getNeighbourList()){
+            for (Node node : neighbourTable.getNeighbourList()) {
 
                 String leaveRequest = String.format("LEAVE %s %d", localNode.getIp(), localNode.getPort());
                 leaveRequest = String.format("%04d %s", (leaveRequest.length() + 5), leaveRequest);
