@@ -22,12 +22,22 @@ public class DSNode {
     }
 
     void startNode() {
+
         logger.useLogger(true);
 
         Scanner scanner = new Scanner(System.in);
 
         String bServerIp = "127.0.0.1";
+        System.out.print("Enter the BS IP (Press Enter to use 127.0.0.1) :");
+        String tmpIP = scanner.nextLine();
+        if(!tmpIP.isEmpty())
+            bServerIp = tmpIP;
+
         int bServerPort = 55555;
+        System.out.print("Enter the BS port number (Press Enter to use 55555) :");
+        String tmpPort = scanner.nextLine();
+        if(!tmpPort.isEmpty())
+            bServerPort = Integer.valueOf(tmpPort);
 
         System.out.print("Enter the name of the node: ");
         String localName = scanner.next();
@@ -44,7 +54,7 @@ public class DSNode {
 
         NeighbourTable neighbourTable = new NeighbourTable(localNode);
 
-        MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable);
+        MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable, fileHandler);
         messageReceiver.start();
 
         ConsoleListener consoleListener = new ConsoleListener(neighbourTable, socketController, fileHandler, serverNode);

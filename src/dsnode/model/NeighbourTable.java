@@ -30,6 +30,17 @@ public class NeighbourTable {
         return null;
     }
 
+    public LinkedList<Node> getActiveNeighbourList(){
+        LinkedList<Node> activeNeighbourList = new LinkedList<>();
+
+        for(Node node:neighbourList){
+            if(node.getStatus().equals(Node.ACTIVE_STATUS))
+                activeNeighbourList.add(node);
+        }
+
+        return activeNeighbourList;
+    }
+
     public boolean isExistingNeighbour(Node sourceNode) {
 
         for (Node node : neighbourList) {

@@ -1,9 +1,11 @@
 package dsnode;
 
+import dsnode.model.FileHandler;
 import dsnode.model.Message;
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
 
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 /**
@@ -16,10 +18,12 @@ class MessageReceiver extends Thread {
 
     private SocketController socketController;
     private NeighbourTable neighbourTable;
+    private FileHandler fileHandler;
 
-    MessageReceiver(SocketController socketController, NeighbourTable neighbourTable) {
+    MessageReceiver(SocketController socketController, NeighbourTable neighbourTable, FileHandler fileHandler) {
         this.socketController = socketController;
         this.neighbourTable = neighbourTable;
+        this.fileHandler = fileHandler;
     }
 
     @Override
@@ -272,10 +276,50 @@ class MessageReceiver extends Thread {
 
     private void handleSER(StringTokenizer tokenizeMessage) {
 
+        String requestIp = tokenizeMessage.nextToken();
+        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node requestNode = new Node(requestIp, requestPort);
+
+        String fileName = tokenizeMessage.nextToken();
+
+        while (tokenizeMessage.countTokens() > 1) {
+            fileName = fileName + " " + tokenizeMessage.nextToken();
+        }
+
+        int hops = Integer.valueOf(tokenizeMessage.nextToken()) + 1;
+
+        ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
+        Node localNode = socketController.getLocalNode();
+
+        int nof = localFileList.size();
+
+        String searchResponse = String.format("SEROK %d %s %d %d", nof, localNode.getIp(), localNode.getPort(), hops);
+        for (String file : localFileList) {
+            searchResponse = String.format("%s %s", searchResponse, file);
+        }
+        searchResponse = String.format("%04d %s", (searchResponse.length() + 5), searchResponse);
+
+        socketController.sendMessage(searchResponse, requestNode);
+
+        // Forward the search request using random walk
+
+
     }
 
     private void handleSEROK(StringTokenizer tokenizeMessage) {
 
+        int nof = Integer.valueOf(tokenizeMessage.nextToken());
+
+        if (nof > 0) {
+            String responseIp = tokenizeMessage.nextToken();
+            int responsePort = Integer.valueOf(tokenizeMessage.nextToken());
+            int hops = Integer.valueOf(tokenizeMessage.nextToken());
+
+            System.out.println("Local search result for file ------ ");
+            while (tokenizeMessage.hasMoreElements()) {
+                System.out.println(String.format("\t\t[%s-%d]\t%s", responseIp, responsePort, tokenizeMessage.nextToken()));
+            }
+        }
     }
 
     private void handleERROR(StringTokenizer tokenizeMessage) {

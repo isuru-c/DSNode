@@ -1,5 +1,6 @@
 package dsnode.model;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -51,5 +52,18 @@ public class FileHandler {
 
     public String[] getFileList() {
         return fileList;
+    }
+
+    public ArrayList<String> searchFiles(String fileName){
+
+        ArrayList<String> list = new ArrayList<>();
+
+        for(String file:fileList){
+            if(file.toLowerCase().contains(fileName.toLowerCase())){
+                list.add(file.replaceAll(" ", "_"));
+            }
+        }
+
+        return list;
     }
 }

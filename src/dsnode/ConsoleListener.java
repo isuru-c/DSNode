@@ -4,6 +4,7 @@ import dsnode.model.FileHandler;
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -103,6 +104,36 @@ public class ConsoleListener extends Thread {
                 socketController.sendMessage(leaveRequest, node);
                 logger.log(String.format("LEAVE from the node [%s]", localNode.getNodeName()));
             }
+        } else if ("search".equals(command1)) {
+
+            String fileName = consoleCommand.substring(command1.length() + 1);
+
+            // First search locally for the file name
+
+            ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
+
+            if (!localFileList.isEmpty()) {
+
+                System.out.println("Local search result for file " + fileName);
+                for (String file : localFileList) {
+                    System.out.println("\t\t" + file);
+                }
+            }
+
+            // Broadcast search message for all neighbours
+
+            Node localNode = socketController.getLocalNode();
+
+            int hops = 0;
+
+            String searchRequest = String.format("SER %s %d %s %d", localNode.getIp(), localNode.getPort(), fileName, hops);
+            searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
+
+            for (Node node : neighbourTable.getActiveNeighbourList()) {
+                socketController.sendMessage(searchRequest, node);
+                logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
+            }
+
         }
 
     }
