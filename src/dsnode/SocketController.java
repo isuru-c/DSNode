@@ -1,5 +1,6 @@
 package dsnode;
 
+import dsnode.Logger;
 import dsnode.model.Message;
 import dsnode.model.Node;
 
@@ -9,7 +10,7 @@ import java.net.*;
 /**
  * @author Isuru Chandima
  */
-class SocketController {
+public class SocketController {
 
     private static Logger logger = new Logger();
 
@@ -22,7 +23,7 @@ class SocketController {
     /**
      * @param localName Name of this node given by the user
      */
-    SocketController(String localName) {
+    public SocketController(String localName) {
         try {
             datagramSocket = new DatagramSocket();
 
@@ -46,7 +47,7 @@ class SocketController {
      * @param message  message needs to send to the remote node
      * @param receiver receiver of the message
      */
-    void sendMessage(String message, Node receiver) {
+    public void sendMessage(String message, Node receiver) {
         try {
             DatagramPacket reqMessagePacket = new DatagramPacket(message.getBytes(), message.getBytes().length, InetAddress.getByName(receiver.getIp()), receiver.getPort());
 
@@ -61,7 +62,7 @@ class SocketController {
     /**
      * @return Message object containing the message sent by remote node and its address
      */
-    Message receiveMessage() {
+    public Message receiveMessage() {
 
         byte[] buffer = new byte[65536];
         DatagramPacket replyPacket = new DatagramPacket(buffer, buffer.length);
@@ -84,7 +85,7 @@ class SocketController {
     /**
      * @return a Node object containing the details of current node.
      */
-    Node getLocalNode() {
+    public Node getLocalNode() {
         return new Node(localIp, localPort, localName);
     }
 }

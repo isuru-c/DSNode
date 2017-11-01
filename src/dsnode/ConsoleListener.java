@@ -61,7 +61,7 @@ public class ConsoleListener extends Thread {
                 System.out.println("--------------------------------------------------------------");
                 int count = 1;
                 for (Node node : neighbourTable.getNeighbourList()) {
-                    System.out.println(String.format("%d\t\t%s\t\t%s\t%d\t%d\t\t%s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastSeen(), node.getStatus()));
+                    System.out.println(String.format("%d\t\t%s\t\t%s\t%d\t%d\t\t%s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastActive(), node.getStatus()));
                     count++;
                 }
                 System.out.println();

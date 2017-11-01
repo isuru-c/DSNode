@@ -23,18 +23,19 @@ public class NeighbourTable {
     public Node getNeighbourNode(Node sourceNode) {
 
         for (Node node : neighbourList) {
-            if (node.getIp().equals(sourceNode.getIp()) && node.getPort() == sourceNode.getPort())
+            if (node.getIp().equals(sourceNode.getIp()) && node.getPort() == sourceNode.getPort()) {
                 return node;
+            }
         }
 
         return null;
     }
 
-    public LinkedList<Node> getActiveNeighbourList(){
+    public LinkedList<Node> getActiveNeighbourList() {
         LinkedList<Node> activeNeighbourList = new LinkedList<>();
 
-        for(Node node:neighbourList){
-            if(node.getStatus().equals(Node.ACTIVE_STATUS))
+        for (Node node : neighbourList) {
+            if (node.getStatus().equals(Node.ACTIVE_STATUS))
                 activeNeighbourList.add(node);
         }
 
@@ -58,12 +59,10 @@ public class NeighbourTable {
     public void removeNeighbour(Node neighbour) {
 
         for (Node node : neighbourList) {
-            if (node.getIp().equals(neighbour.getIp()) && node.getPort() == neighbour.getPort()){
+            if (node.getIp().equals(neighbour.getIp()) && node.getPort() == neighbour.getPort()) {
                 neighbourList.removeFirstOccurrence(node);
-
                 break;
             }
-
         }
     }
 }

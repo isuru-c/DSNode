@@ -1,7 +1,6 @@
 package dsnode.model;
 
 /**
- *
  * @author Isuru Chandima
  */
 public class Node {
@@ -9,18 +8,22 @@ public class Node {
     private String ip;
     private int port;
     private String nodeName = "-ny-";
-    private int lastSeen;
+    private int lastActive;
+    private int lastHello;
     private String status;
 
     public static String INITIAL_STATUS = "Initial";
     public static String ACTIVE_STATUS = "Active";
     public static String INACTIVE_STATUS = "Inactive";
-    private static String TEMPORARY_STATUS = "TemporaryNode";
+    public static String DEAD_STATUS = "Dead";
+    private static String TEMPORARY_STATUS = "Temporary";
 
     public Node(String ip, int port) {
         this.ip = ip;
         this.port = port;
-        this.lastSeen = 99999;
+        this.nodeName = "-ny-";
+        this.lastActive = 99999;
+        this.lastHello = 0;
         this.status = TEMPORARY_STATUS;
     }
 
@@ -28,16 +31,29 @@ public class Node {
         this.ip = ip;
         this.port = port;
         this.nodeName = userName;
-        this.lastSeen = 99999;
+        this.lastActive = 99999;
         this.status = TEMPORARY_STATUS;
     }
 
-    public void restLastSeen(){
-        lastSeen = 1;
+    public void restLastActive() {
+        lastActive = 1;
+    }
+
+    public void resetLastHello() {
+        lastHello = 1;
+    }
+
+    public void increaseTime() {
+        lastActive++;
+        lastHello++;
     }
 
     public void setStatus(String status) {
         this.status = status;
+        if(getStatus().equals(ACTIVE_STATUS)){
+            restLastActive();
+            resetLastHello();
+        }
     }
 
     public void setNodeName(String nodeName) {
@@ -56,8 +72,12 @@ public class Node {
         return nodeName;
     }
 
-    public int getLastSeen() {
-        return lastSeen;
+    public int getLastActive() {
+        return lastActive;
+    }
+
+    public int getLastHello() {
+        return lastHello;
     }
 
     public String getStatus() {

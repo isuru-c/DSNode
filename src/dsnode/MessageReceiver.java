@@ -54,7 +54,7 @@ class MessageReceiver extends Thread {
                 } else if ("UNROK".equals(command)) {
                     handleUNROK(st);
                 } else if ("LEAVEOK".equals(command)) {
-                    handleLEAVEOK(st);
+                    handleLEAVEOK(st, sourceNode);
                 } else if ("LEAVE".equals(command)) {
                     handleLEAVE(st);
                 } else if ("JOIN".equals(command)) {
@@ -65,6 +65,10 @@ class MessageReceiver extends Thread {
                     handleNAME(st, sourceNode);
                 } else if ("NAMEOK".equals(command)) {
                     handleNAMEOK(st);
+                } else if ("HELLO".equals(command)) {
+                    handleHELLO(st);
+                } else if ("HELLOOK".equals(command)) {
+                    handleHELLOOK(st);
                 } else if ("SER".equals(command)) {
                     handleSER(st);
                 } else if ("SEROK".equals(command)) {
@@ -91,7 +95,7 @@ class MessageReceiver extends Thread {
     private void handleUNROK(StringTokenizer tokenizeMessage) {
 
         if (tokenizeMessage.countTokens() < 1) {
-            logger.log(String.format("Incomplete message for JOIN request []"));
+            logger.log("Incomplete message for JOIN request");
             return;
         }
 
@@ -123,7 +127,7 @@ class MessageReceiver extends Thread {
         int value = 0;
 
         if (neighbourTable.isExistingNeighbour(neighbour)) {
-            logger.log(String.format("Neighbour [] leave the system", neighbourTable.getNeighbourNode(neighbour).getNodeName()));
+            logger.log(String.format("Neighbour [%s] leave the system", neighbourTable.getNeighbourNode(neighbour).getNodeName()));
             neighbourTable.removeNeighbour(neighbour);
         } else {
             value = 9999;
@@ -137,7 +141,7 @@ class MessageReceiver extends Thread {
         socketController.sendMessage(leaveResponseMessage, neighbour);
     }
 
-    private void handleLEAVEOK(StringTokenizer tokenizeMessage) {
+    private void handleLEAVEOK(StringTokenizer tokenizeMessage, Node sourceNode) {
 
         if (tokenizeMessage.countTokens() < 1) {
             logger.log("Incomplete message for LEAVEOK response...!");
@@ -148,6 +152,7 @@ class MessageReceiver extends Thread {
 
         if ("0".equals(value)) {
             // Successful leaving in remote node, remove neighbour node from the routing table
+            neighbourTable.removeNeighbour(sourceNode);
 
         } else if ("9999".equals(value)) {
             // Error while leaving from neighbour node
@@ -159,7 +164,7 @@ class MessageReceiver extends Thread {
     private void handleJOIN(StringTokenizer tokenizeMessage) {
 
         if (tokenizeMessage.countTokens() < 2) {
-            logger.log(String.format("Incomplete message for JOIN request []"));
+            logger.log("Incomplete message for JOIN request");
             return;
         }
 
@@ -183,7 +188,7 @@ class MessageReceiver extends Thread {
 
         if (value == 0) {
             newNeighbour.setStatus(Node.ACTIVE_STATUS);
-            newNeighbour.restLastSeen();
+            newNeighbour.restLastActive();
             neighbourTable.addNeighbour(newNeighbour);
             logger.log(String.format("New neighbour added [%s-%d]", newNodeIp, newNodePort));
 
@@ -211,7 +216,7 @@ class MessageReceiver extends Thread {
 
             if (node != null) {
                 node.setStatus(Node.ACTIVE_STATUS);
-                node.restLastSeen();
+                node.restLastActive();
             } else {
                 logger.log(String.format("Different IP/Port parameters in message and data packet [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
                 return;
@@ -272,6 +277,54 @@ class MessageReceiver extends Thread {
             neighbourNode.setNodeName(nodeName);
             logger.log(String.format("Name updated in the node [%s-%d]", nodeIp, nodePort));
         }
+    }
+
+    private void handleHELLO(StringTokenizer tokenizeMessage) {
+
+        if (tokenizeMessage.countTokens() < 4) {
+            logger.log("Incomplete message for HELLO request...!");
+            return;
+        }
+
+        String targetIp = tokenizeMessage.nextToken();
+        int targetPort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node targetNode = new Node(targetIp, targetPort);
+
+        String requestIp = tokenizeMessage.nextToken();
+        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node requestNode = new Node(requestIp, requestPort);
+
+        if (neighbourTable.isLocalNode(targetNode) && neighbourTable.isExistingNeighbour(requestNode)) {
+            Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
+            neighbourNode.setStatus(Node.ACTIVE_STATUS);
+
+            String helloOkMessage = String.format("HELLOOK %s %d %s %d", targetNode.getIp(), targetNode.getPort(), neighbourNode.getIp(), neighbourNode.getPort());
+            helloOkMessage = String.format("%04d %s", (helloOkMessage.length() + 5), helloOkMessage);
+
+            socketController.sendMessage(helloOkMessage, neighbourNode);
+        }
+    }
+
+    private void handleHELLOOK(StringTokenizer tokenizeMessage) {
+
+        if (tokenizeMessage.countTokens() < 4) {
+            logger.log("Incomplete message for HELLOOK response...!");
+            return;
+        }
+
+        String targetIp = tokenizeMessage.nextToken();
+        int targetPort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node targetNode = new Node(targetIp, targetPort);
+
+        String requestIp = tokenizeMessage.nextToken();
+        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
+        Node requestNode = new Node(requestIp, requestPort);
+
+        if (neighbourTable.isLocalNode(targetNode) && neighbourTable.isExistingNeighbour(requestNode)) {
+            Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
+            neighbourNode.setStatus(Node.ACTIVE_STATUS);
+        }
+
     }
 
     private void handleSER(StringTokenizer tokenizeMessage) {

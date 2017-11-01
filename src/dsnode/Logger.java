@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @author Isuru Chandima
  */
-class Logger {
+public class Logger {
 
     private static int STD_OUT = 1;
     private static int FILE_OUT = 2;
@@ -19,12 +19,12 @@ class Logger {
     DateFormat dateFormat;
     Date date;
 
-    Logger() {
+    public Logger() {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         date = new Date();
     }
 
-    void log(String message) {
+    public void log(String message) {
 
         if (!activeLogger)
             return;

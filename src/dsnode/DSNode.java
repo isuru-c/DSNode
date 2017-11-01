@@ -21,7 +21,7 @@ public class DSNode {
 
     }
 
-    void startNode() {
+    private void startNode() {
 
         logger.useLogger(true);
 
@@ -53,6 +53,9 @@ public class DSNode {
         FileHandler fileHandler = new FileHandler();
 
         NeighbourTable neighbourTable = new NeighbourTable(localNode);
+
+        RouteHandler routeHandler = new RouteHandler(neighbourTable, socketController, localNode);
+        routeHandler.start();
 
         MessageReceiver messageReceiver = new MessageReceiver(socketController, neighbourTable, fileHandler);
         messageReceiver.start();
