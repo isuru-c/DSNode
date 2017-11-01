@@ -1,6 +1,7 @@
 package dsnode;
 
 import dsnode.model.Node;
+import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -15,19 +16,19 @@ class BSServer {
     private Node serverNode;
     private Node localNode;
 
-    private SocketController socketController;
+    private ConnectionHandler connectionHandler;
 
     /**
      * @param serverNode Node object containing the details of the Bootstrap Server
      * @param localNode Node object containing the details of this node given by the user
-     * @param socketController SocketController object used to access socket connection
+     * @param connectionHandler SocketHandler object used to access socket connection
      */
-    BSServer(Node serverNode, Node localNode, SocketController socketController) {
+    BSServer(Node serverNode, Node localNode, ConnectionHandler connectionHandler) {
 
         this.serverNode = serverNode;
         this.localNode = localNode;
 
-        this.socketController = socketController;
+        this.connectionHandler = connectionHandler;
     }
 
     /**
@@ -46,10 +47,10 @@ class BSServer {
         regMessage = String.format("%04d %s", (regMessage.length() + 5), regMessage);
 
         logger.log("Register request message to BS [" + regMessage + "]");
-        socketController.sendMessage(regMessage, serverNode);
+        connectionHandler.sendMessage(regMessage, serverNode);
         logger.log("Register request message is sent to BS");
 
-        String replyMsg = socketController.receiveMessage().getMessage();
+        String replyMsg = connectionHandler.receiveMessage().getMessage();
         logger.log("Register response message received from BS [" + replyMsg + "]");
 
         StringTokenizer st = new StringTokenizer(replyMsg, " ");

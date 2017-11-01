@@ -3,6 +3,7 @@ package dsnode;
 import dsnode.model.FileHandler;
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
+import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,13 +18,13 @@ public class ConsoleListener extends Thread {
     private static Logger logger = new Logger();
 
     private NeighbourTable neighbourTable;
-    private SocketController socketController;
+    private ConnectionHandler connectionHandler;
     private FileHandler fileHandler;
     private Node bsServer;
 
-    ConsoleListener(NeighbourTable neighbourTable, SocketController socketController, FileHandler fileHandler, Node bsServer) {
+    ConsoleListener(NeighbourTable neighbourTable, ConnectionHandler connectionHandler, FileHandler fileHandler, Node bsServer) {
         this.neighbourTable = neighbourTable;
-        this.socketController = socketController;
+        this.connectionHandler = connectionHandler;
         this.fileHandler = fileHandler;
         this.bsServer = bsServer;
     }
@@ -83,15 +84,15 @@ public class ConsoleListener extends Thread {
 
         } else if ("leave".equals(command1)) {
 
-            Node localNode = socketController.getLocalNode();
+            Node localNode = connectionHandler.getLocalNode();
 
             // Unregister from the Bootstrap Server
 
             String unregRequest = String.format("UNREG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());
             unregRequest = String.format("%04d %s", (unregRequest.length() + 5), unregRequest);
 
-            socketController.sendMessage(unregRequest, bsServer);
-            logger.log(String.format("UNREG from the BS Server"));
+            connectionHandler.sendMessage(unregRequest, bsServer);
+            logger.log("UNREG from the BS Server");
 
 
             // Leave from all the neighbours
@@ -101,7 +102,7 @@ public class ConsoleListener extends Thread {
                 String leaveRequest = String.format("LEAVE %s %d", localNode.getIp(), localNode.getPort());
                 leaveRequest = String.format("%04d %s", (leaveRequest.length() + 5), leaveRequest);
 
-                socketController.sendMessage(leaveRequest, node);
+                connectionHandler.sendMessage(leaveRequest, node);
                 logger.log(String.format("LEAVE from the node [%s]", localNode.getNodeName()));
             }
         } else if ("search".equals(command1)) {
@@ -122,7 +123,7 @@ public class ConsoleListener extends Thread {
 
             // Broadcast search message for all neighbours
 
-            Node localNode = socketController.getLocalNode();
+            Node localNode = connectionHandler.getLocalNode();
 
             int hops = 0;
 
@@ -130,7 +131,7 @@ public class ConsoleListener extends Thread {
             searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
 
             for (Node node : neighbourTable.getActiveNeighbourList()) {
-                socketController.sendMessage(searchRequest, node);
+                connectionHandler.sendMessage(searchRequest, node);
                 logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
             }
 

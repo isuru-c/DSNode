@@ -1,6 +1,5 @@
-package dsnode;
+package dsnode.net;
 
-import dsnode.Logger;
 import dsnode.model.Message;
 import dsnode.model.Node;
 
@@ -10,43 +9,25 @@ import java.net.*;
 /**
  * @author Isuru Chandima
  */
-public class SocketController {
-
-    private static Logger logger = new Logger();
-
-    private String localIp;
-    private int localPort;
-    private String localName;
+public class SocketHandler extends ConnectionHandler{
 
     private DatagramSocket datagramSocket;
 
     /**
      * @param localName Name of this node given by the user
      */
-    public SocketController(String localName) {
+    public SocketHandler(String localName) {
+
+        super(localName);
+
         try {
             datagramSocket = new DatagramSocket();
-
-            this.localPort = datagramSocket.getLocalPort();
-            this.localName = localName;
-
-            DatagramSocket socket = new DatagramSocket();
-            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-            this.localIp = socket.getLocalAddress().getHostAddress();
-
-            logger.log("Socket open at the port " + datagramSocket.getLocalPort());
-
-        } catch (UnknownHostException e) {
-            logger.log("Error while getting local IP..!");
         } catch (SocketException e) {
             logger.log("Error while opening socket connection..!");
         }
     }
 
-    /**
-     * @param message  message needs to send to the remote node
-     * @param receiver receiver of the message
-     */
+    @Override
     public void sendMessage(String message, Node receiver) {
         try {
             DatagramPacket reqMessagePacket = new DatagramPacket(message.getBytes(), message.getBytes().length, InetAddress.getByName(receiver.getIp()), receiver.getPort());
@@ -59,9 +40,7 @@ public class SocketController {
         }
     }
 
-    /**
-     * @return Message object containing the message sent by remote node and its address
-     */
+    @Override
     public Message receiveMessage() {
 
         byte[] buffer = new byte[65536];
@@ -82,10 +61,4 @@ public class SocketController {
         return new Message(new String(data, 0, replyPacket.getLength()), new Node(remoteIp, remotePort));
     }
 
-    /**
-     * @return a Node object containing the details of current node.
-     */
-    public Node getLocalNode() {
-        return new Node(localIp, localPort, localName);
-    }
 }

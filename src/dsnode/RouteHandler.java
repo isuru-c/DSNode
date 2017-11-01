@@ -2,6 +2,7 @@ package dsnode;
 
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
+import dsnode.net.ConnectionHandler;
 
 /**
  * @author Isuru Chandima
@@ -12,15 +13,15 @@ public class RouteHandler extends Thread {
     private static Logger logger = new Logger();
 
     private NeighbourTable neighbourTable;
-    private SocketController socketController;
+    private ConnectionHandler connectionHandler;
     private Node localNode;
     private int activeTimeLength;
     private int inactiveTimeLength;
     private int inactiveHelloPeriod;
 
-    RouteHandler(NeighbourTable neighbourTable, SocketController socketController, Node localNode) {
+    RouteHandler(NeighbourTable neighbourTable, ConnectionHandler connectionHandler, Node localNode) {
         this.neighbourTable = neighbourTable;
-        this.socketController = socketController;
+        this.connectionHandler = connectionHandler;
         this.localNode = localNode;
         this.activeTimeLength = 60;
         this.inactiveTimeLength = this.activeTimeLength * 2;
@@ -51,7 +52,7 @@ public class RouteHandler extends Thread {
                         String helloMessage = String.format("HELLO %s %d %s %d", node.getIp(), node.getPort(), localNode.getIp(), localNode.getPort());
                         helloMessage = String.format("%04d %s", (helloMessage.length() + 5), helloMessage);
 
-                        socketController.sendMessage(helloMessage, node);
+                        connectionHandler.sendMessage(helloMessage, node);
 
                         node.resetLastHello();
 
@@ -62,7 +63,7 @@ public class RouteHandler extends Thread {
                             String helloMessage = String.format("HELLO %s %d %s %d", node.getIp(), node.getPort(), localNode.getIp(), localNode.getPort());
                             helloMessage = String.format("%04d %s", (helloMessage.length() + 5), helloMessage);
 
-                            socketController.sendMessage(helloMessage, node);
+                            connectionHandler.sendMessage(helloMessage, node);
 
                             node.resetLastHello();
                         }

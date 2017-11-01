@@ -4,6 +4,7 @@ import dsnode.model.FileHandler;
 import dsnode.model.Message;
 import dsnode.model.NeighbourTable;
 import dsnode.model.Node;
+import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -16,12 +17,12 @@ class MessageReceiver extends Thread {
 
     private static Logger logger = new Logger();
 
-    private SocketController socketController;
+    private ConnectionHandler connectionHandler;
     private NeighbourTable neighbourTable;
     private FileHandler fileHandler;
 
-    MessageReceiver(SocketController socketController, NeighbourTable neighbourTable, FileHandler fileHandler) {
-        this.socketController = socketController;
+    MessageReceiver(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler) {
+        this.connectionHandler = connectionHandler;
         this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
     }
@@ -32,7 +33,7 @@ class MessageReceiver extends Thread {
         while (true) {
             try {
 
-                Message messageObject = socketController.receiveMessage();
+                Message messageObject = connectionHandler.receiveMessage();
 
                 String message = messageObject.getMessage();
                 Node sourceNode = messageObject.getSourceNode();
@@ -138,7 +139,7 @@ class MessageReceiver extends Thread {
         String leaveResponseMessage = String.format("LEAVEOK %d", value);
         leaveResponseMessage = String.format("%04d %s", (leaveResponseMessage.length() + 5), leaveResponseMessage);
 
-        socketController.sendMessage(leaveResponseMessage, neighbour);
+        connectionHandler.sendMessage(leaveResponseMessage, neighbour);
     }
 
     private void handleLEAVEOK(StringTokenizer tokenizeMessage, Node sourceNode) {
@@ -184,7 +185,7 @@ class MessageReceiver extends Thread {
         String responseMessage = String.format("JOINOK %d", value);
         responseMessage = String.format("%04d %s", (responseMessage.length() + 5), responseMessage);
 
-        socketController.sendMessage(responseMessage, newNeighbour);
+        connectionHandler.sendMessage(responseMessage, newNeighbour);
 
         if (value == 0) {
             newNeighbour.setStatus(Node.ACTIVE_STATUS);
@@ -196,7 +197,7 @@ class MessageReceiver extends Thread {
             String nameRequest = String.format("NAME %s %d", newNodeIp, newNodePort);
             nameRequest = String.format("%04d %s", (nameRequest.length() + 5), nameRequest);
 
-            socketController.sendMessage(nameRequest, newNeighbour);
+            connectionHandler.sendMessage(nameRequest, newNeighbour);
             logger.log(String.format("NAME request sent [%s-%d]", newNodeIp, newNodePort));
         }
     }
@@ -232,7 +233,7 @@ class MessageReceiver extends Thread {
         String nameRequest = String.format("NAME %s %d", sourceNode.getIp(), sourceNode.getPort());
         nameRequest = String.format("%04d %s", (nameRequest.length() + 5), nameRequest);
 
-        socketController.sendMessage(nameRequest, sourceNode);
+        connectionHandler.sendMessage(nameRequest, sourceNode);
         logger.log(String.format("NAME request sent [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
     }
 
@@ -252,10 +253,10 @@ class MessageReceiver extends Thread {
             return;
 
         // Send NAMEOK respond to the NAME requester
-        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, socketController.getLocalNode().getNodeName());
+        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, connectionHandler.getLocalNode().getNodeName());
         nameResponse = String.format("%04d %s", (nameResponse.length() + 5), nameResponse);
 
-        socketController.sendMessage(nameResponse, sourceNode);
+        connectionHandler.sendMessage(nameResponse, sourceNode);
         logger.log(String.format("NAMEOK respond sent to [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
 
     }
@@ -301,7 +302,7 @@ class MessageReceiver extends Thread {
             String helloOkMessage = String.format("HELLOOK %s %d %s %d", targetNode.getIp(), targetNode.getPort(), neighbourNode.getIp(), neighbourNode.getPort());
             helloOkMessage = String.format("%04d %s", (helloOkMessage.length() + 5), helloOkMessage);
 
-            socketController.sendMessage(helloOkMessage, neighbourNode);
+            connectionHandler.sendMessage(helloOkMessage, neighbourNode);
         }
     }
 
@@ -342,7 +343,7 @@ class MessageReceiver extends Thread {
         int hops = Integer.valueOf(tokenizeMessage.nextToken()) + 1;
 
         ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
-        Node localNode = socketController.getLocalNode();
+        Node localNode = connectionHandler.getLocalNode();
 
         int nof = localFileList.size();
 
@@ -352,7 +353,7 @@ class MessageReceiver extends Thread {
         }
         searchResponse = String.format("%04d %s", (searchResponse.length() + 5), searchResponse);
 
-        socketController.sendMessage(searchResponse, requestNode);
+        connectionHandler.sendMessage(searchResponse, requestNode);
 
         // Forward the search request using random walk
 
