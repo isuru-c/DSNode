@@ -22,9 +22,9 @@ public class ConsoleListener extends Thread {
     private FileHandler fileHandler;
     private Node bsServer;
 
-    ConsoleListener(NeighbourTable neighbourTable, ConnectionHandler connectionHandler, FileHandler fileHandler, Node bsServer) {
-        this.neighbourTable = neighbourTable;
+    ConsoleListener(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, Node bsServer) {
         this.connectionHandler = connectionHandler;
+        this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
         this.bsServer = bsServer;
     }

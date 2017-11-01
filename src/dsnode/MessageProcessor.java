@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 /**
+ *
  * @author Isuru Chandima
  */
 @SuppressWarnings("InfiniteLoopStatement")
-class MessageReceiver extends Thread {
+class MessageProcessor extends Thread {
 
     private static Logger logger = new Logger();
 
@@ -21,10 +22,21 @@ class MessageReceiver extends Thread {
     private NeighbourTable neighbourTable;
     private FileHandler fileHandler;
 
-    MessageReceiver(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler) {
+    private Node localNode;
+
+    MessageProcessor(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, Node serverNode) {
         this.connectionHandler = connectionHandler;
         this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
+
+        this.localNode = connectionHandler.getLocalNode();
+
+        String regMessage = String.format("REG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());
+        regMessage = String.format("%04d %s", (regMessage.length() + 5), regMessage);
+
+        logger.log(String.format("Register request message to BS [%s]", regMessage));
+        connectionHandler.sendMessage(regMessage, serverNode);
+        logger.log("Register request message is sent to BS");
     }
 
     @Override
@@ -46,7 +58,6 @@ class MessageReceiver extends Thread {
                 String command = st.nextToken();
 
                 if (st.countTokens() == 0) {
-                    Thread.sleep(100);
                     continue;
                 }
 
@@ -83,13 +94,72 @@ class MessageReceiver extends Thread {
 
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                logger.log("MessageReceiver thread interrupted.");
+                logger.log("MessageProcessor thread interrupted.");
             }
         }
 
     }
 
     private void handleREGOK(StringTokenizer tokenizeMessage) {
+
+        String no_nodes = tokenizeMessage.nextToken();
+
+        if ("9999".equals(no_nodes)) {
+            // 9999 – failed, there is some error in the command
+            logger.log("Error:9999 – failed, there is some error in the command");
+
+        } else if ("9998".equals(no_nodes)) {
+            // 9998 – failed, already registered to you, unregister first
+            logger.log("Error:9998 – failed, already registered to you, unregister first");
+
+        } else if ("9997".equals(no_nodes)) {
+            // 9997 – failed, registered to another user, try a different IP and port
+            logger.log("Error:9997 – failed, registered to another user, try a different IP and port");
+
+        } else if ("9996".equals(no_nodes)) {
+            // 9996 – failed, can’t register. BS full.
+            logger.log("Error:9996 – failed, can’t register. BS full.");
+
+        } else {
+            // No error, no_nodes indicate the number of nodes given by the BS
+
+            int numOfNodes = Integer.valueOf(no_nodes);
+
+            if (numOfNodes == 0) {
+                // No node is given, this is the first node in the network.
+
+                logger.log("No detail about node is received from BS. This is the first node in the network.");
+
+            } else {
+                // numOfNodes number of nodes given by the server. Select random 2 nodes
+                // and return details of those nodes.
+
+                logger.log(numOfNodes + " nodes received from BS");
+
+                int count = 1;
+
+                Node localNode = connectionHandler.getLocalNode();
+
+                String joinMessage = String.format("JOIN %s %d", localNode.getIp(), localNode.getPort());
+                joinMessage = String.format("%04d %s", (joinMessage.length() + 5), joinMessage);
+                logger.log(String.format("JOIN request created [%s]", joinMessage));
+
+                while (count <= numOfNodes) {
+                    String nodeIp = tokenizeMessage.nextToken();
+                    int nodePort = Integer.valueOf(tokenizeMessage.nextToken());
+
+                    Node node = new Node(nodeIp, nodePort);
+
+                    logger.log(String.format("Joining request sent to node [%s-%d]", nodeIp, nodePort));
+                    connectionHandler.sendMessage(joinMessage, node);
+
+                    node.setStatus(Node.INITIAL_STATUS);
+                    neighbourTable.addNeighbour(node);
+
+                    count++;
+                }
+            }
+        }
 
     }
 

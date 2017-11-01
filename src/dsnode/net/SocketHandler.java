@@ -18,13 +18,28 @@ public class SocketHandler extends ConnectionHandler{
      */
     public SocketHandler(String localName) {
 
-        super(localName);
+        String localIp = "";
+        int localPort = 0;
 
         try {
+            DatagramSocket ds = new DatagramSocket();
+
+            ds.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            localIp = ds.getLocalAddress().getHostAddress();
+
+            logger.log("Socket open at the port " + ds.getLocalPort());
+            ds.close();
+
             datagramSocket = new DatagramSocket();
+            localPort = datagramSocket.getLocalPort();
+
+        } catch (UnknownHostException e) {
+            logger.log("Error while getting local IP..!");
         } catch (SocketException e) {
             logger.log("Error while opening socket connection..!");
         }
+
+        setLocalNode(localIp, localPort, localName);
     }
 
     @Override

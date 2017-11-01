@@ -4,11 +4,6 @@ import dsnode.Logger;
 import dsnode.model.Message;
 import dsnode.model.Node;
 
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-
 /**
  *
  * @author Isuru Chandima
@@ -17,27 +12,21 @@ public abstract class ConnectionHandler {
 
     static Logger logger = new Logger();
 
-    String localIp;
-    int localPort;
-    String localName;
+    private String localIp;
+    private int localPort;
+    private String localName;
 
-    public ConnectionHandler(String localName){
-        try {
-            DatagramSocket datagramSocket = new DatagramSocket();
-
-            this.localPort = datagramSocket.getLocalPort();
-            this.localName = localName;
-
-            datagramSocket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-            this.localIp = datagramSocket.getLocalAddress().getHostAddress();
-
-            logger.log("Socket open at the port " + datagramSocket.getLocalPort());
-
-        } catch (UnknownHostException e) {
-            logger.log("Error while getting local IP..!");
-        } catch (SocketException e) {
-            logger.log("Error while opening socket connection..!");
-        }
+    /**
+     * This function is used to set the parameters of the local node
+     *
+     * @param localIp ip used by the local node
+     * @param localPort port number used by the local node
+     * @param localName name given by the user to the local node
+     */
+    void setLocalNode(String localIp, int localPort, String localName){
+        this.localName = localName;
+        this.localIp = localIp;
+        this.localPort = localPort;
     }
 
     /**

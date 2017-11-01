@@ -19,9 +19,9 @@ public class RouteHandler extends Thread {
     private int inactiveTimeLength;
     private int inactiveHelloPeriod;
 
-    RouteHandler(NeighbourTable neighbourTable, ConnectionHandler connectionHandler, Node localNode) {
-        this.neighbourTable = neighbourTable;
+    RouteHandler(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, Node localNode) {
         this.connectionHandler = connectionHandler;
+        this.neighbourTable = neighbourTable;
         this.localNode = localNode;
         this.activeTimeLength = 60;
         this.inactiveTimeLength = this.activeTimeLength * 2;

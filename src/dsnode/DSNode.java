@@ -6,7 +6,6 @@ import dsnode.model.Node;
 import dsnode.net.ConnectionHandler;
 import dsnode.net.SocketHandler;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -41,48 +40,29 @@ public class DSNode {
         if(!tmpPort.isEmpty())
             bServerPort = Integer.valueOf(tmpPort);
 
+        String localName = "node-x";
         System.out.print("Enter the name of the node: ");
-        String localName = scanner.next();
+        String tmpName = scanner.next();
+        if(!tmpName.isEmpty())
+            localName = tmpName;
 
         ConnectionHandler connectionHandler = new SocketHandler(localName);
 
         Node localNode = connectionHandler.getLocalNode();
         Node serverNode = new Node(bServerIp, bServerPort);
 
-        BSServer bServer = new BSServer(serverNode, localNode, connectionHandler);
-        ArrayList<Node> nodeList = bServer.getNodeList();
-
         FileHandler fileHandler = new FileHandler();
 
         NeighbourTable neighbourTable = new NeighbourTable(localNode);
 
-        RouteHandler routeHandler = new RouteHandler(neighbourTable, connectionHandler, localNode);
+        RouteHandler routeHandler = new RouteHandler(connectionHandler, neighbourTable, localNode);
         routeHandler.start();
 
-        MessageReceiver messageReceiver = new MessageReceiver(connectionHandler, neighbourTable, fileHandler);
+        MessageProcessor messageReceiver = new MessageProcessor(connectionHandler, neighbourTable, fileHandler, serverNode);
         messageReceiver.start();
 
-        ConsoleListener consoleListener = new ConsoleListener(neighbourTable, connectionHandler, fileHandler, serverNode);
+        ConsoleListener consoleListener = new ConsoleListener(connectionHandler, neighbourTable, fileHandler, serverNode);
         consoleListener.start();
 
-        if (nodeList.size() == 0) {
-            // No other node, this is the first node of the network
-            logger.log("No node given by the BS. This is the first node in system.");
-
-        } else {
-            // There are other nodes in the network, join with them
-
-            for (Node node : nodeList) {
-
-                String joinMessage = String.format("JOIN %s %d", localNode.getIp(), localNode.getPort());
-                joinMessage = String.format("%04d %s", (joinMessage.length() + 5), joinMessage);
-
-                logger.log(String.format("Joining to a node [%s]", joinMessage));
-                connectionHandler.sendMessage(joinMessage, node);
-
-                node.setStatus(Node.INITIAL_STATUS);
-                neighbourTable.addNeighbour(node);
-            }
-        }
     }
 }
