@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 /**
- *
  * @author Isuru Chandima
  */
 @SuppressWarnings("InfiniteLoopStatement")
@@ -24,13 +23,19 @@ class MessageProcessor extends Thread {
 
     private Node localNode;
 
+    private int maxNumOfHops;
+
     MessageProcessor(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, Node serverNode) {
+
         this.connectionHandler = connectionHandler;
         this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
 
         this.localNode = connectionHandler.getLocalNode();
 
+        this.maxNumOfHops = 7;
+
+        // To start as a node in the distributed system, send the register request to the Bootstrap Server
         String regMessage = String.format("REG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());
         regMessage = String.format("%04d %s", (regMessage.length() + 5), regMessage);
 
@@ -43,58 +48,50 @@ class MessageProcessor extends Thread {
     public void run() {
 
         while (true) {
-            try {
 
-                Message messageObject = connectionHandler.receiveMessage();
+            Message messageObject = connectionHandler.receiveMessage();
 
-                String message = messageObject.getMessage();
-                Node sourceNode = messageObject.getSourceNode();
+            String message = messageObject.getMessage();
+            Node sourceNode = messageObject.getSourceNode();
 
-                logger.log(String.format("Message received [%s]", message));
+            logger.log(String.format("Message received [%s]", message));
 
-                StringTokenizer st = new StringTokenizer(message, " ");
+            StringTokenizer st = new StringTokenizer(message, " ");
 
-                st.nextToken(); // Length of the message
-                String command = st.nextToken();
+            st.nextToken(); // Length of the message, can be assigned to a variable if it is needed
+            String command = st.nextToken();
 
-                if (st.countTokens() == 0) {
-                    continue;
-                }
+            if (!st.hasMoreTokens()) {
+                continue;
+            }
 
-                if ("REGOK".equals(command)) {
-                    handleREGOK(st);
-                } else if ("UNROK".equals(command)) {
-                    handleUNROK(st);
-                } else if ("LEAVEOK".equals(command)) {
-                    handleLEAVEOK(st, sourceNode);
-                } else if ("LEAVE".equals(command)) {
-                    handleLEAVE(st);
-                } else if ("JOIN".equals(command)) {
-                    handleJOIN(st);
-                } else if ("JOINOK".equals(command)) {
-                    handleJOINOK(st, sourceNode);
-                } else if ("NAME".equals(command)) {
-                    handleNAME(st, sourceNode);
-                } else if ("NAMEOK".equals(command)) {
-                    handleNAMEOK(st);
-                } else if ("HELLO".equals(command)) {
-                    handleHELLO(st);
-                } else if ("HELLOOK".equals(command)) {
-                    handleHELLOOK(st);
-                } else if ("SER".equals(command)) {
-                    handleSER(st);
-                } else if ("SEROK".equals(command)) {
-                    handleSEROK(st);
-                } else if ("ERROR".equals(command)) {
-                    handleERROR(st);
-                } else {
-                    // Do something in here
-                    logger.log(String.format("Unrecognized command found : [%s]", command));
-                }
-
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                logger.log("MessageProcessor thread interrupted.");
+            if ("REGOK".equals(command)) {
+                handleREGOK(st);
+            } else if ("UNROK".equals(command)) {
+                handleUNROK(st);
+            } else if ("LEAVEOK".equals(command)) {
+                handleLEAVEOK(st, sourceNode);
+            } else if ("LEAVE".equals(command)) {
+                handleLEAVE(st);
+            } else if ("JOIN".equals(command)) {
+                handleJOIN(st);
+            } else if ("JOINOK".equals(command)) {
+                handleJOINOK(st, sourceNode);
+            } else if ("NAME".equals(command)) {
+                handleNAME(st, sourceNode);
+            } else if ("NAMEOK".equals(command)) {
+                handleNAMEOK(st);
+            } else if ("HELLO".equals(command)) {
+                handleHELLO(st);
+            } else if ("HELLOOK".equals(command)) {
+                handleHELLOOK(st);
+            } else if ("SER".equals(command)) {
+                handleSER(st, sourceNode);
+            } else if ("SEROK".equals(command)) {
+                handleSEROK(st, sourceNode);
+            } else {
+                // Do something in here to handle the unrecognized message
+                logger.log(String.format("Unrecognized command found : [%s]", command));
             }
         }
 
@@ -138,8 +135,6 @@ class MessageProcessor extends Thread {
 
                 int count = 1;
 
-                Node localNode = connectionHandler.getLocalNode();
-
                 String joinMessage = String.format("JOIN %s %d", localNode.getIp(), localNode.getPort());
                 joinMessage = String.format("%04d %s", (joinMessage.length() + 5), joinMessage);
                 logger.log(String.format("JOIN request created [%s]", joinMessage));
@@ -178,7 +173,7 @@ class MessageProcessor extends Thread {
 
         } else if ("9999".equals(value)) {
             // Error while unregister from BS server
-            logger.log("Error in JOINOK message response...!");
+            logger.log("Error in UNROK message response...!");
         }
 
     }
@@ -269,6 +264,7 @@ class MessageProcessor extends Thread {
 
             connectionHandler.sendMessage(nameRequest, newNeighbour);
             logger.log(String.format("NAME request sent [%s-%d]", newNodeIp, newNodePort));
+            System.out.println("Waiting for the respond from the Bootstrap Server...");
         }
     }
 
@@ -323,7 +319,7 @@ class MessageProcessor extends Thread {
             return;
 
         // Send NAMEOK respond to the NAME requester
-        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, connectionHandler.getLocalNode().getNodeName());
+        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, localNode.getNodeName());
         nameResponse = String.format("%04d %s", (nameResponse.length() + 5), nameResponse);
 
         connectionHandler.sendMessage(nameResponse, sourceNode);
@@ -352,6 +348,22 @@ class MessageProcessor extends Thread {
 
     private void handleHELLO(StringTokenizer tokenizeMessage) {
 
+        /*
+         * HELLO message format
+         *
+         * length HELLO IP_address1 port_no1 IP_address2 port_no2
+         *
+         * length - Length of the entire message including 4 characters used to indicate the length. In xxxx format
+         * HELLO - Hello request
+         *
+         * IP_address1 - IP address of the node which the hello request message is sending to
+         * port_no1 - Port number of the node which the hello request message is sending to
+         *
+         * IP_address2 - IP address of the node which the hello request message is sending from
+         * port_no2 - Port number of the node which the hello request message is sending from
+         *
+         */
+
         if (tokenizeMessage.countTokens() < 4) {
             logger.log("Incomplete message for HELLO request...!");
             return;
@@ -369,7 +381,7 @@ class MessageProcessor extends Thread {
             Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
             neighbourNode.setStatus(Node.ACTIVE_STATUS);
 
-            String helloOkMessage = String.format("HELLOOK %s %d %s %d", targetNode.getIp(), targetNode.getPort(), neighbourNode.getIp(), neighbourNode.getPort());
+            String helloOkMessage = String.format("HELLOOK %s %d %s %d", neighbourNode.getIp(), neighbourNode.getPort(), targetNode.getIp(), targetNode.getPort());
             helloOkMessage = String.format("%04d %s", (helloOkMessage.length() + 5), helloOkMessage);
 
             connectionHandler.sendMessage(helloOkMessage, neighbourNode);
@@ -377,6 +389,23 @@ class MessageProcessor extends Thread {
     }
 
     private void handleHELLOOK(StringTokenizer tokenizeMessage) {
+
+        /*
+         * HELLOOK message format
+         *
+         * length HELLOOK IP_address1 port_no1 IP_address2 port_no2
+         *
+         * length - Length of the entire message including 4 characters used to indicate the length. In xxxx format
+         * HELLOOK - Hello Ok response
+         *
+         * IP_address1 - IP address of the node which the hello ok response message is sending to
+         * port_no1 - Port number of the node which the hello ok response message is sending to
+         *
+         * IP_address2 - IP address of the node which the hello ok response message is sending from
+         * port_no2 - Port number of the node which the hello ok response message is sending from
+         *
+         */
+
 
         if (tokenizeMessage.countTokens() < 4) {
             logger.log("Incomplete message for HELLOOK response...!");
@@ -398,22 +427,52 @@ class MessageProcessor extends Thread {
 
     }
 
-    private void handleSER(StringTokenizer tokenizeMessage) {
+    private void handleSER(StringTokenizer tokenizeMessage, Node sourceNode) {
+
+        /*
+         * SER message format
+         *
+         * length SER IP port file_name hops
+         *
+         * length – Length of the entire message including 4 characters used to indicate the length. In xxxx format
+         * SER – Locate a file with this name
+         *
+         * IP – IP address of the node that is searching for the file. May be useful depending your design
+         * port – port number of the node that is searching for the file. May be useful depending your design
+         *
+         * file_name – File name being searched
+         * hops – A hop count. May be of use for cost calculations
+         *
+         */
+
+        // If the node which sends the SER request to this node is neighbour of this node, make it active and reset timers
+        if (neighbourTable.isExistingNeighbour(sourceNode)) {
+            Node neighbourNode = neighbourTable.getNeighbourNode(sourceNode);
+            neighbourNode.setStatus(Node.ACTIVE_STATUS);
+        }
 
         String requestIp = tokenizeMessage.nextToken();
         int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
         Node requestNode = new Node(requestIp, requestPort);
 
-        String fileName = tokenizeMessage.nextToken();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(tokenizeMessage.nextToken());
 
         while (tokenizeMessage.countTokens() > 1) {
-            fileName = fileName + " " + tokenizeMessage.nextToken();
+            stringBuilder.append(" ");
+            stringBuilder.append(tokenizeMessage.nextToken());
         }
+
+        String fileName = stringBuilder.toString();
 
         int hops = Integer.valueOf(tokenizeMessage.nextToken()) + 1;
 
+        if (hops > maxNumOfHops) {
+            // SER message has reached the maximum number of hops it can be forwarded.
+            return;
+        }
+
         ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
-        Node localNode = connectionHandler.getLocalNode();
 
         int nof = localFileList.size();
 
@@ -430,23 +489,50 @@ class MessageProcessor extends Thread {
 
     }
 
-    private void handleSEROK(StringTokenizer tokenizeMessage) {
+    private void handleSEROK(StringTokenizer tokenizeMessage, Node sourceNode) {
+
+        /*
+         * SEROK message format
+         *
+         * length SEROK no_files IP port hops filename1 filename2 ... ...
+         *
+         * length – Length of the entire message including 4 characters used to indicate the length. In xxxx format
+         * SEROK – Sends the result for search. The node that sends this message is the one that actually stored the (key, value) pair, i.e., node that index the file information
+         *
+         * no_files – Number of results returned
+         *      ≥ 1 – Successful
+         *      0 – no matching results. Searched key is not in key table
+         *      9999 – failure due to node unreachable
+         *      9998 – some other error
+         *
+         * IP – IP address of the node having (stored) the file
+         * port – Port number of the node having (stored) the file
+         *
+         * hops – Hops required to find the file(s)
+         * filename – Actual name of the file
+         *
+         */
+
+        // If the node which sends the SEROK response to this node is neighbour of this node, make it active and reset timers
+        if (neighbourTable.isExistingNeighbour(sourceNode)) {
+            Node neighbourNode = neighbourTable.getNeighbourNode(sourceNode);
+            neighbourNode.setStatus(Node.ACTIVE_STATUS);
+        }
 
         int nof = Integer.valueOf(tokenizeMessage.nextToken());
 
         if (nof > 0) {
             String responseIp = tokenizeMessage.nextToken();
             int responsePort = Integer.valueOf(tokenizeMessage.nextToken());
-            int hops = Integer.valueOf(tokenizeMessage.nextToken());
 
-            System.out.println("Local search result for file ------ ");
+            // Get the hop count to when it is needed
+            tokenizeMessage.nextToken();
+
+            System.out.println("Network search result for file ------ ");
             while (tokenizeMessage.hasMoreElements()) {
                 System.out.println(String.format("\t\t[%s-%d]\t%s", responseIp, responsePort, tokenizeMessage.nextToken()));
             }
         }
     }
 
-    private void handleERROR(StringTokenizer tokenizeMessage) {
-
-    }
 }

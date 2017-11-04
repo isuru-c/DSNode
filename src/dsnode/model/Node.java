@@ -32,6 +32,7 @@ public class Node {
         this.port = port;
         this.nodeName = userName;
         this.lastActive = 99999;
+        this.lastHello = 0;
         this.status = TEMPORARY_STATUS;
     }
 
