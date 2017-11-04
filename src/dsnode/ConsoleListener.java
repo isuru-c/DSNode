@@ -2,7 +2,9 @@ package dsnode;
 
 import dsnode.model.FileHandler;
 import dsnode.model.NeighbourTable;
-import dsnode.model.Node;
+import dsnode.model.SearchHandler;
+import dsnode.model.data.Node;
+import dsnode.model.data.SearchResultSet;
 import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
@@ -20,13 +22,18 @@ public class ConsoleListener extends Thread {
     private NeighbourTable neighbourTable;
     private ConnectionHandler connectionHandler;
     private FileHandler fileHandler;
-    private Node bsServer;
+    private SearchHandler searchHandler;
 
-    ConsoleListener(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, Node bsServer) {
+    private Node bsServer;
+    private Node localNode;
+
+    ConsoleListener(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, SearchHandler searchHandler, Node bsServer) {
         this.connectionHandler = connectionHandler;
         this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
+        this.searchHandler = searchHandler;
         this.bsServer = bsServer;
+        this.localNode = connectionHandler.getLocalNode();
     }
 
     @Override
@@ -80,6 +87,11 @@ public class ConsoleListener extends Thread {
                     count++;
                 }
                 System.out.print("----------------------------------\n\n#");
+            }else if("search".equals(command2)){
+                // Show the results of the latest search
+
+                ArrayList<SearchResultSet> searchResultSets = searchHandler.getSearchResultSets();
+
             }
 
         } else if ("leave".equals(command1)) {
@@ -108,6 +120,7 @@ public class ConsoleListener extends Thread {
         } else if ("search".equals(command1)) {
 
             String fileName = consoleCommand.substring(command1.length() + 1);
+            searchHandler.newSearch(fileName.replaceAll(" ", "_"));
 
             // First search locally for the file name
 
@@ -115,10 +128,14 @@ public class ConsoleListener extends Thread {
 
             if (!localFileList.isEmpty()) {
 
-                System.out.println("Local search result for file " + fileName);
+                String[] fileNames = new String[localFileList.size()];
+                int count = 0;
+
                 for (String file : localFileList) {
-                    System.out.println("\t\t" + file);
+                    fileNames[count++] = file;
                 }
+
+                searchHandler.addSearchResult(new SearchResultSet(localNode, fileNames, 0), fileName);
             }
 
             // Broadcast search message for all neighbours

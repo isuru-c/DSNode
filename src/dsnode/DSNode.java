@@ -2,7 +2,8 @@ package dsnode;
 
 import dsnode.model.FileHandler;
 import dsnode.model.NeighbourTable;
-import dsnode.model.Node;
+import dsnode.model.SearchHandler;
+import dsnode.model.data.Node;
 import dsnode.net.ConnectionHandler;
 import dsnode.net.SocketHandler;
 
@@ -55,13 +56,15 @@ public class DSNode {
 
         NeighbourTable neighbourTable = new NeighbourTable(localNode);
 
+        SearchHandler searchHandler = new SearchHandler();
+
         RouteHandler routeHandler = new RouteHandler(connectionHandler, neighbourTable, localNode);
         routeHandler.start();
 
-        MessageProcessor messageReceiver = new MessageProcessor(connectionHandler, neighbourTable, fileHandler, serverNode);
+        MessageProcessor messageReceiver = new MessageProcessor(connectionHandler, neighbourTable, fileHandler, searchHandler, serverNode);
         messageReceiver.start();
 
-        ConsoleListener consoleListener = new ConsoleListener(connectionHandler, neighbourTable, fileHandler, serverNode);
+        ConsoleListener consoleListener = new ConsoleListener(connectionHandler, neighbourTable, fileHandler, searchHandler, serverNode);
         consoleListener.start();
 
     }

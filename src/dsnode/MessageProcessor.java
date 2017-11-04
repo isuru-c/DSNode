@@ -1,9 +1,11 @@
 package dsnode;
 
 import dsnode.model.FileHandler;
-import dsnode.model.Message;
+import dsnode.model.SearchHandler;
+import dsnode.model.data.Message;
 import dsnode.model.NeighbourTable;
-import dsnode.model.Node;
+import dsnode.model.data.Node;
+import dsnode.model.data.SearchResultSet;
 import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
@@ -20,16 +22,18 @@ class MessageProcessor extends Thread {
     private ConnectionHandler connectionHandler;
     private NeighbourTable neighbourTable;
     private FileHandler fileHandler;
+    private SearchHandler searchHandler;
 
     private Node localNode;
 
     private int maxNumOfHops;
 
-    MessageProcessor(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, Node serverNode) {
+    MessageProcessor(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, SearchHandler searchHandler, Node serverNode) {
 
         this.connectionHandler = connectionHandler;
         this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
+        this.searchHandler = searchHandler;
 
         this.localNode = connectionHandler.getLocalNode();
 
@@ -476,7 +480,7 @@ class MessageProcessor extends Thread {
 
         int nof = localFileList.size();
 
-        String searchResponse = String.format("SEROK %d %s %d %d", nof, localNode.getIp(), localNode.getPort(), hops);
+        String searchResponse = String.format("SEROK %s %d %s %d %d", fileName.replaceAll(" ", "_"), nof, localNode.getIp(), localNode.getPort(), hops);
         for (String file : localFileList) {
             searchResponse = String.format("%s %s", searchResponse, file);
         }
@@ -494,10 +498,12 @@ class MessageProcessor extends Thread {
         /*
          * SEROK message format
          *
-         * length SEROK no_files IP port hops filename1 filename2 ... ...
+         * length SEROK file_name no_files IP port hops filename1 filename2 ... ...
          *
          * length – Length of the entire message including 4 characters used to indicate the length. In xxxx format
          * SEROK – Sends the result for search. The node that sends this message is the one that actually stored the (key, value) pair, i.e., node that index the file information
+         *
+         * file_name - File name being searched
          *
          * no_files – Number of results returned
          *      ≥ 1 – Successful
@@ -519,19 +525,28 @@ class MessageProcessor extends Thread {
             neighbourNode.setStatus(Node.ACTIVE_STATUS);
         }
 
+        String searchFileName = tokenizeMessage.nextToken();
+
         int nof = Integer.valueOf(tokenizeMessage.nextToken());
 
         if (nof > 0) {
             String responseIp = tokenizeMessage.nextToken();
             int responsePort = Integer.valueOf(tokenizeMessage.nextToken());
 
-            // Get the hop count to when it is needed
-            tokenizeMessage.nextToken();
+            Node responseNode = new Node(responseIp, responsePort);
+            if (neighbourTable.isExistingNeighbour(responseNode))
+                responseNode = neighbourTable.getNeighbourNode(responseNode);
 
-            System.out.println("Network search result for file ------ ");
+            int hopCount = Integer.valueOf(tokenizeMessage.nextToken());
+
+            String[] fileNames = new String[nof];
+            int count = 0;
+
             while (tokenizeMessage.hasMoreElements()) {
-                System.out.println(String.format("\t\t[%s-%d]\t%s", responseIp, responsePort, tokenizeMessage.nextToken()));
+                fileNames[count] = tokenizeMessage.nextToken();
+                count++;
             }
+            searchHandler.addSearchResult(new SearchResultSet(responseNode, fileNames, hopCount), searchFileName);
         }
     }
 

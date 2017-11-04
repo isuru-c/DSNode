@@ -1,7 +1,7 @@
 package dsnode;
 
 import dsnode.model.NeighbourTable;
-import dsnode.model.Node;
+import dsnode.model.data.Node;
 import dsnode.net.ConnectionHandler;
 
 /**

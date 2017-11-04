@@ -1,4 +1,4 @@
-package dsnode.model;
+package dsnode.model.data;
 
 /**
  * @author Isuru Chandima

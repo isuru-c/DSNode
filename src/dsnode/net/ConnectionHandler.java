@@ -1,8 +1,8 @@
 package dsnode.net;
 
 import dsnode.Logger;
-import dsnode.model.Message;
-import dsnode.model.Node;
+import dsnode.model.data.Message;
+import dsnode.model.data.Node;
 
 /**
  *

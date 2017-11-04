@@ -1,9 +1,9 @@
-package dsnode.model;
+package dsnode.model.data;
 
 public class Message {
 
-    String message;
-    Node sourceNode;
+    private String message;
+    private Node sourceNode;
 
     public Message(String message, Node sourceNode) {
         this.message = message;

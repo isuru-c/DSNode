@@ -1,7 +1,7 @@
 package dsnode.net;
 
-import dsnode.model.Message;
-import dsnode.model.Node;
+import dsnode.model.data.Message;
+import dsnode.model.data.Node;
 
 import java.io.IOException;
 import java.net.*;

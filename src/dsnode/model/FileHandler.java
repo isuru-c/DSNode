@@ -59,11 +59,15 @@ public class FileHandler {
         ArrayList<String> list = new ArrayList<>();
 
         for(String file:fileList){
-            if(file.toLowerCase().contains(fileName.toLowerCase())){
+            if(isMatched(file, fileName)){
                 list.add(file.replaceAll(" ", "_"));
             }
         }
 
         return list;
+    }
+
+    private boolean isMatched(String file, String searchName){
+        return file.toLowerCase().contains(searchName.toLowerCase());
     }
 }

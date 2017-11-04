@@ -1,5 +1,7 @@
 package dsnode.model;
 
+import dsnode.model.data.Node;
+
 import java.util.LinkedList;
 
 public class NeighbourTable {
