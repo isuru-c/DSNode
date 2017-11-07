@@ -87,7 +87,7 @@ public class ConsoleListener extends Thread {
                     count++;
                 }
                 System.out.print("----------------------------------\n\n#");
-            }else if("search".equals(command2)){
+            } else if ("search".equals(command2)) {
                 // Show the results of the latest search
 
                 ArrayList<SearchResultSet> searchResultSets = searchHandler.getSearchResultSets();
@@ -120,7 +120,7 @@ public class ConsoleListener extends Thread {
         } else if ("search".equals(command1)) {
 
             String fileName = consoleCommand.substring(command1.length() + 1);
-            searchHandler.newSearch(fileName.replaceAll(" ", "_"));
+            searchHandler.newSearch(fileName.replace(' ', '_'));
 
             // First search locally for the file name
 
@@ -139,8 +139,6 @@ public class ConsoleListener extends Thread {
             }
 
             // Broadcast search message for all neighbours
-
-            Node localNode = connectionHandler.getLocalNode();
 
             int hops = 0;
 

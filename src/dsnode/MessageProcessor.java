@@ -480,7 +480,7 @@ class MessageProcessor extends Thread {
 
         int nof = localFileList.size();
 
-        String searchResponse = String.format("SEROK %s %d %s %d %d", fileName.replaceAll(" ", "_"), nof, localNode.getIp(), localNode.getPort(), hops);
+        String searchResponse = String.format("SEROK %s %d %s %d %d", fileName.replace(' ', '_'), nof, localNode.getIp(), localNode.getPort(), hops);
         for (String file : localFileList) {
             searchResponse = String.format("%s %s", searchResponse, file);
         }

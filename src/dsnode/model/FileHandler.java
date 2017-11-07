@@ -54,20 +54,39 @@ public class FileHandler {
         return fileList;
     }
 
-    public ArrayList<String> searchFiles(String fileName){
+    public ArrayList<String> searchFiles(String fileName) {
 
         ArrayList<String> list = new ArrayList<>();
 
-        for(String file:fileList){
-            if(isMatched(file, fileName)){
-                list.add(file.replaceAll(" ", "_"));
+        for (String file : fileList) {
+            if (isMatched(file, fileName)) {
+                list.add(file.replace(' ', '_'));
             }
         }
 
         return list;
     }
 
-    private boolean isMatched(String file, String searchName){
-        return file.toLowerCase().contains(searchName.toLowerCase());
+    private boolean isMatched(String file, String searchName) {
+
+        file = file.toLowerCase();
+        searchName = searchName.toLowerCase();
+
+        if (file.contains(searchName)) {
+            int startOfName = file.indexOf(searchName);
+            int endOfName = startOfName + searchName.length() - 1;
+
+            if (startOfName == 0) {
+                return endOfName == file.length() - 1 || file.charAt(endOfName + 1) == ' ';
+            } else {
+                if (endOfName == file.length() - 1) {
+                    return file.charAt(startOfName - 1) == ' ';
+                } else {
+                    return file.charAt(startOfName - 1) == ' ' && file.charAt(endOfName + 1) == ' ';
+                }
+            }
+        }
+
+        return false;
     }
 }
