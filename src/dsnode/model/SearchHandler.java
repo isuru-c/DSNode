@@ -1,5 +1,6 @@
 package dsnode.model;
 
+import dsnode.model.data.Node;
 import dsnode.model.data.SearchResultSet;
 
 import java.util.ArrayList;
@@ -23,7 +24,13 @@ public class SearchHandler {
     public void addSearchResult(SearchResultSet searchResultSet, String searchName) {
         if (this.currentSearch.equals(searchName)) {
             searchResultSets.add(searchResultSet);
-            searchCount++;
+            Node ownerNode = searchResultSet.getOwnerNode();
+            System.out.println(String.format("Search Result for \"%s\": From node [%s-%d] %s", currentSearch,ownerNode.getIp(),ownerNode.getPort(),ownerNode.getNodeName()));
+            for (String searchResult : searchResultSet.getFileNames()) {
+                searchCount++;
+                System.out.println(String.format("\t\t\t%d - %s", searchCount, searchResult));
+            }
+            System.out.print("\n# ");
         }
     }
 
