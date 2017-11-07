@@ -61,7 +61,11 @@ public class ConsoleListener extends Thread {
 
         if ("show".equals(command1)) {
 
-            String command2 = st.nextToken();
+            String command2;
+
+            if (st.hasMoreTokens())
+                command2 = st.nextToken();
+            else return;
 
             if ("neighbours".equals(command2)) {
 
@@ -92,11 +96,23 @@ public class ConsoleListener extends Thread {
 
                 ArrayList<SearchResultSet> searchResultSets = searchHandler.getSearchResultSets();
 
+                int count = 0;
+
+                System.out.println();
+                for (SearchResultSet searchResultSet : searchResultSets) {
+                    Node ownerNode = searchResultSet.getOwnerNode();
+                    System.out.println(String.format("Search Result for \"%s\": From node [%s-%d] %s <%d nodes away>", searchHandler.getCurrentSearch(), ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount()));
+                    for (String searchResult : searchResultSet.getFileNames()) {
+                        count++;
+                        System.out.println(String.format("\t\t\t%d - %s", count, searchResult));
+                    }
+                    System.out.println();
+                }
+                System.out.print("# ");
+
             }
 
         } else if ("leave".equals(command1)) {
-
-            Node localNode = connectionHandler.getLocalNode();
 
             // Unregister from the Bootstrap Server
 

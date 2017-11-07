@@ -37,4 +37,8 @@ public class SearchHandler {
     public ArrayList<SearchResultSet> getSearchResultSets() {
         return searchResultSets;
     }
+
+    public String getCurrentSearch() {
+        return currentSearch;
+    }
 }
