@@ -21,10 +21,10 @@ public class Node {
     public Node(String ip, int port) {
         this.ip = ip;
         this.port = port;
-        this.nodeName = "-ny-";
+        this.nodeName = "-";
         this.lastActive = 99999;
         this.lastHello = 0;
-        this.status = TEMPORARY_STATUS;
+        this.status = INITIAL_STATUS;
     }
 
     public Node(String ip, int port, String userName) {
@@ -33,7 +33,7 @@ public class Node {
         this.nodeName = userName;
         this.lastActive = 99999;
         this.lastHello = 0;
-        this.status = TEMPORARY_STATUS;
+        this.status = INITIAL_STATUS;
     }
 
     public void restLastActive() {
@@ -50,6 +50,11 @@ public class Node {
     }
 
     public void setStatus(String status) {
+
+        if(!this.status.equals(status)){
+            System.out.print(String.format("Neighbour [%s:%d %s] goes to %s from %s \n# ", getIp(), getPort(), getNodeName(), status, this.status));
+        }
+
         this.status = status;
         if(getStatus().equals(ACTIVE_STATUS)){
             restLastActive();

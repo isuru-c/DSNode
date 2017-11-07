@@ -9,7 +9,7 @@ import java.net.*;
 /**
  * @author Isuru Chandima
  */
-public class SocketHandler extends ConnectionHandler{
+public class SocketHandler extends ConnectionHandler {
 
     private DatagramSocket datagramSocket;
 
@@ -28,6 +28,7 @@ public class SocketHandler extends ConnectionHandler{
             localIp = ds.getLocalAddress().getHostAddress();
 
             logger.log("Socket open at the port " + ds.getLocalPort());
+            System.out.print(String.format("Socket open at the port [%d]\n# ", ds.getLocalPort()));
             ds.close();
 
             datagramSocket = new DatagramSocket();

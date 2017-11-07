@@ -9,8 +9,6 @@ import dsnode.model.data.SearchResultSet;
 import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.StringTokenizer;
 
 /**
@@ -48,6 +46,7 @@ class MessageProcessor extends Thread {
         logger.log(String.format("Register request message to BS [%s]", regMessage));
         connectionHandler.sendMessage(regMessage, serverNode);
         logger.log("Register request message is sent to BS");
+        System.out.print("Waiting for respond from the Bootstrap Server...\n# ");
     }
 
     @Override
@@ -132,12 +131,15 @@ class MessageProcessor extends Thread {
                 // No node is given, this is the first node in the network.
 
                 logger.log("No detail about node is received from BS. This is the first node in the network.");
+                System.out.print("Bootstrap Server responded. No other node in the network\n# ");
 
             } else {
                 // numOfNodes number of nodes given by the server. Select random 2 nodes
                 // and return details of those nodes.
 
                 logger.log(numOfNodes + " nodes received from BS");
+
+                System.out.print(String.format("Bootstrap Server responded. Connecting to %d nodes...\n# ", numOfNodes));
 
                 int count = 1;
 
@@ -176,7 +178,7 @@ class MessageProcessor extends Thread {
         if ("0".equals(value)) {
             // Successful unregister from the BS server
             logger.log("Successfully unregistered from the BS server");
-
+            System.out.print("Unregistered from the Bootstrap Server\n# ");
         } else if ("9999".equals(value)) {
             // Error while unregister from BS server
             logger.log("Error in UNROK message response...!");
@@ -270,7 +272,6 @@ class MessageProcessor extends Thread {
 
             connectionHandler.sendMessage(nameRequest, newNeighbour);
             logger.log(String.format("NAME request sent [%s-%d]", newNodeIp, newNodePort));
-            System.out.println("Waiting for the respond from the Bootstrap Server...");
         }
     }
 
@@ -481,7 +482,7 @@ class MessageProcessor extends Thread {
             return;
         }
 
-        if(fileHandler.isNewSearchId(searchId)) {
+        if (fileHandler.isNewSearchId(searchId)) {
             ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
 
             int nof = localFileList.size();

@@ -64,6 +64,7 @@ public class NeighbourTable {
         for (Node node : neighbourList) {
             if (node.getIp().equals(neighbour.getIp()) && node.getPort() == neighbour.getPort()) {
                 neighbourList.removeFirstOccurrence(node);
+                System.out.print(String.format("Neighbour [%s:%d %s] left\n# ", node.getIp(), node.getPort(), node.getNodeName()));
                 break;
             }
         }

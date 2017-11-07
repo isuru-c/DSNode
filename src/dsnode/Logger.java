@@ -14,7 +14,7 @@ public class Logger {
 
     private int logType = 1;
 
-    private boolean activeLogger = true;
+    private boolean activeLogger = false;
 
     DateFormat dateFormat;
     Date date;
