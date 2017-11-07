@@ -3,6 +3,7 @@ package dsnode.model;
 import dsnode.model.data.Node;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class NeighbourTable {
 
@@ -66,5 +67,38 @@ public class NeighbourTable {
                 break;
             }
         }
+    }
+
+    private Node getRandomNeighbour() {
+
+        LinkedList<Node> activeNeighbourList = getActiveNeighbourList();
+
+        int neighbourCount = activeNeighbourList.size();
+
+        if (neighbourCount == 0)
+            return null;
+
+        Random rand = new Random();
+        int randomNumber = rand.nextInt(neighbourCount);
+
+        return activeNeighbourList.get(randomNumber);
+    }
+
+    public Node getRandomNeighbour(Node node) {
+
+        Node randomNode = null;
+        boolean randomNodeFound = false;
+
+        while (!randomNodeFound) {
+            randomNode = getRandomNeighbour();
+
+            if (randomNode == null)
+                return null;
+
+            if (!(node.getIp().equals(randomNode.getIp()) && node.getPort() == randomNode.getPort()))
+                randomNodeFound = true;
+        }
+
+        return randomNode;
     }
 }

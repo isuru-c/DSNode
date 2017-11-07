@@ -8,6 +8,7 @@ import dsnode.model.data.SearchResultSet;
 import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -154,11 +155,16 @@ public class ConsoleListener extends Thread {
                 searchHandler.addSearchResult(new SearchResultSet(localNode, fileNames, 0), fileName);
             }
 
+            Random random = new Random();
+
+            long searchId = random.nextLong();
+            fileHandler.addSearchId(String.valueOf(searchId));
+
             // Broadcast search message for all neighbours
 
             int hops = 0;
 
-            String searchRequest = String.format("SER %s %d %s %d", localNode.getIp(), localNode.getPort(), fileName, hops);
+            String searchRequest = String.format("SER %s %d %d %s %d", localNode.getIp(), localNode.getPort(), searchId, fileName, hops);
             searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
 
             for (Node node : neighbourTable.getActiveNeighbourList()) {

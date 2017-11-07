@@ -9,6 +9,8 @@ import dsnode.model.data.SearchResultSet;
 import dsnode.net.ConnectionHandler;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.StringTokenizer;
 
 /**
@@ -436,7 +438,7 @@ class MessageProcessor extends Thread {
         /*
          * SER message format
          *
-         * length SER IP port file_name hops
+         * length SER IP port searchId file_name hops
          *
          * length – Length of the entire message including 4 characters used to indicate the length. In xxxx format
          * SER – Locate a file with this name
@@ -444,6 +446,7 @@ class MessageProcessor extends Thread {
          * IP – IP address of the node that is searching for the file. May be useful depending your design
          * port – port number of the node that is searching for the file. May be useful depending your design
          *
+         * searchId - random long int value use as search id
          * file_name – File name being searched
          * hops – A hop count. May be of use for cost calculations
          *
@@ -458,6 +461,8 @@ class MessageProcessor extends Thread {
         String requestIp = tokenizeMessage.nextToken();
         int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
         Node requestNode = new Node(requestIp, requestPort);
+
+        String searchId = tokenizeMessage.nextToken();
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(tokenizeMessage.nextToken());
@@ -476,20 +481,31 @@ class MessageProcessor extends Thread {
             return;
         }
 
-        ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
+        if(fileHandler.isNewSearchId(searchId)) {
+            ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
 
-        int nof = localFileList.size();
+            int nof = localFileList.size();
 
-        String searchResponse = String.format("SEROK %s %d %s %d %d", fileName.replace(' ', '_'), nof, localNode.getIp(), localNode.getPort(), hops);
-        for (String file : localFileList) {
-            searchResponse = String.format("%s %s", searchResponse, file);
+            String searchResponse = String.format("SEROK %s %d %s %d %d", fileName.replace(' ', '_'), nof, localNode.getIp(), localNode.getPort(), hops);
+            for (String file : localFileList) {
+                searchResponse = String.format("%s %s", searchResponse, file);
+            }
+            searchResponse = String.format("%04d %s", (searchResponse.length() + 5), searchResponse);
+
+            connectionHandler.sendMessage(searchResponse, requestNode);
         }
-        searchResponse = String.format("%04d %s", (searchResponse.length() + 5), searchResponse);
-
-        connectionHandler.sendMessage(searchResponse, requestNode);
 
         // Forward the search request using random walk
 
+        Node randomNode = neighbourTable.getRandomNeighbour(sourceNode);
+
+        if (randomNode == null)
+            return;
+
+        String searchRequest = String.format("SER %s %d %s %s %d", requestIp, requestPort, searchId, fileName, hops);
+        searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
+
+        connectionHandler.sendMessage(searchRequest, randomNode);
 
     }
 

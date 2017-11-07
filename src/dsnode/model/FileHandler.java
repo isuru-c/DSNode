@@ -1,6 +1,8 @@
 package dsnode.model;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 /**
@@ -9,6 +11,8 @@ import java.util.Random;
 public class FileHandler {
 
     private String[] fileList;
+
+    private Queue<String> searchIdList;
 
     public FileHandler() {
 
@@ -48,6 +52,7 @@ public class FileHandler {
             count++;
         }
 
+        this.searchIdList = new LinkedList<>();
     }
 
     public String[] getFileList() {
@@ -88,5 +93,29 @@ public class FileHandler {
         }
 
         return false;
+    }
+
+    public boolean isNewSearchId(String searchId){
+        int searchIdLimit = 100;
+
+        for(String oldSearchId : searchIdList){
+            if(oldSearchId.equals(searchId))
+                return false;
+        }
+
+        if(searchIdList.size()==searchIdLimit)
+            searchIdList.remove();
+
+        searchIdList.add(searchId);
+        return true;
+    }
+
+    public void addSearchId(String searchId){
+        int searchIdLimit = 100;
+
+        if(searchIdList.size()==searchIdLimit)
+            searchIdList.remove();
+
+        searchIdList.add(searchId);
     }
 }
