@@ -17,4 +17,19 @@ public interface NodeControllerInterface extends Remote{
         public String searchItem(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
         public String searchFound(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
 
+        public void joinAsNeighbour(String message) throws ClassNotFoundException, RemoteException;
+        public void joinResponse(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
+
+        public void getName(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
+        public void nameResponse(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
+
+        public void leaveAsNeighbour(String message) throws ClassNotFoundException, RemoteException;
+        public void leaveResponse(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
+
+        public void hello(String message) throws ClassNotFoundException, RemoteException;
+        public void helloResponse(String message) throws ClassNotFoundException, RemoteException;
+
+
+
+
 }

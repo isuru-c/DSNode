@@ -16,7 +16,9 @@ public class NeighbourTable {
     }
 
     public void addNeighbour(Node newNode) {
-        newNode.setNodeController(newNode.getNodeControlerForNode());
+        if(newNode.getStatus().equals(Node.ACTIVE_STATUS)) {
+            newNode.setNodeController(newNode.getNodeControlerForNode());
+        }
         neighbourList.add(newNode);
     }
 

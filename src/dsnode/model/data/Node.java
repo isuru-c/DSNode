@@ -22,7 +22,7 @@ public class Node implements Serializable {
     private String status;
 
     // RMI Node Controller
-    private NodeControllerInterface nodeController;
+    private transient NodeControllerInterface nodeController;
 
 
     public static String INITIAL_STATUS = "Initial";

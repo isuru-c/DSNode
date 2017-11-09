@@ -4,6 +4,8 @@ import dsnode.model.NeighbourTable;
 import dsnode.model.data.Node;
 import dsnode.net.ConnectionHandler;
 
+import java.rmi.RemoteException;
+
 /**
  * @author Isuru Chandima
  */
@@ -52,7 +54,8 @@ public class RouteHandler extends Thread {
                         String helloMessage = String.format("HELLO %s %d %s %d", node.getIp(), node.getPort(), localNode.getIp(), localNode.getPort());
                         helloMessage = String.format("%04d %s", (helloMessage.length() + 5), helloMessage);
 
-                        connectionHandler.sendMessage(helloMessage, node);
+                        node.getNodeController().hello(helloMessage);
+//                        connectionHandler.sendMessage(helloMessage, node);
 
                         node.resetLastHello();
 
@@ -63,7 +66,8 @@ public class RouteHandler extends Thread {
                             String helloMessage = String.format("HELLO %s %d %s %d", node.getIp(), node.getPort(), localNode.getIp(), localNode.getPort());
                             helloMessage = String.format("%04d %s", (helloMessage.length() + 5), helloMessage);
 
-                            connectionHandler.sendMessage(helloMessage, node);
+                            node.getNodeController().hello(helloMessage);
+//                            connectionHandler.sendMessage(helloMessage, node);
 
                             node.resetLastHello();
                         }
@@ -74,6 +78,10 @@ public class RouteHandler extends Thread {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 logger.log(String.format("Route Handler interrupted. [%s]", e.toString()));
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
         }
 

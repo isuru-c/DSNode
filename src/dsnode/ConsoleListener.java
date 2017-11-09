@@ -133,6 +133,7 @@ public class ConsoleListener extends Thread {
             String unregRequest = String.format("UNREG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());
             unregRequest = String.format("%04d %s", (unregRequest.length() + 5), unregRequest);
 
+
             connectionHandler.sendMessage(unregRequest, bsServer);
             logger.log("UNREG from the BS Server");
 
@@ -144,7 +145,15 @@ public class ConsoleListener extends Thread {
                 String leaveRequest = String.format("LEAVE %s %d", localNode.getIp(), localNode.getPort());
                 leaveRequest = String.format("%04d %s", (leaveRequest.length() + 5), leaveRequest);
 
-                connectionHandler.sendMessage(leaveRequest, node);
+                try {
+                    node.getNodeController().leaveAsNeighbour(leaveRequest);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+//                connectionHandler.sendMessage(leaveRequest, node);
                 logger.log(String.format("LEAVE from the node [%s]", localNode.getNodeName()));
             }
 
