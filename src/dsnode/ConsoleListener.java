@@ -104,17 +104,22 @@ public class ConsoleListener extends Thread {
                     return;
                 }
 
-                System.out.println(String.format("Search Result for [%s]:", searchHandler.getCurrentSearch()));
+                System.out.println(String.format("Search Result for [%s]:\n", searchHandler.getCurrentSearch()));
+                System.out.println("--------------------------------------------------------------------------------------------");
+                System.out.println(String.format(" %-6s | %-20s | %-36s | %-9s | %-8s","Number", "File Name", "          Owner details","Hop Count", "Time(ms)"));
+                System.out.println(String.format(" %-6s | %-20s | %-10s | %-15s | %-5s | %-9s | %-8s"," ", " ","Name", "IP Address","Port", " ", " "));
+                System.out.println("--------------------------------------------------------------------------------------------");
                 for (SearchResultSet searchResultSet : searchResultSets) {
                     Node ownerNode = searchResultSet.getOwnerNode();
-                    System.out.println(String.format("\tFrom node [%s-%d] %s [%d nodes away - %dms]", ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount(), searchResultSet.getQueryTime()));
+                    //System.out.println(String.format("\tFrom node [%s-%d] %s [%d nodes away - %dms]", ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount(), searchResultSet.getQueryTime()));
                     for (String searchResult : searchResultSet.getFileNames()) {
                         count++;
-                        System.out.println(String.format("\t\t%d - %s", count, searchResult));
+                        System.out.println(String.format(" %-6d | %-20s | %-10s | %-15s | %-5d | %-9d | %-8d", count,searchResult,ownerNode.getNodeName(),ownerNode.getIp(), ownerNode.getPort(),searchResultSet.getHopCount(),searchResultSet.getQueryTime()));
                     }
-                    System.out.println();
+                    //System.out.println();
                 }
-                System.out.print("# ");
+                System.out.println("--------------------------------------------------------------------------------------------");
+                System.out.print("\n# ");
 
             }
 
