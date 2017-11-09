@@ -70,25 +70,25 @@ public class ConsoleListener extends Thread {
 
             if ("neighbours".equals(command2)) {
 
-                System.out.println("Number\tName\t\tIP Address\t\tPort\tLast Seen\tStatus");
-                System.out.println("--------------------------------------------------------------");
+                System.out.println(String.format(" %-6s | %-12s | %-15s | %-6s | %-10s | %-6s","Number","Name","IP Address","Port","Last Seen","Status"));
+                System.out.println("------------------------------------------------------------------------");
                 int count = 1;
                 for (Node node : neighbourTable.getNeighbourList()) {
-                    System.out.println(String.format("%d\t\t%s\t\t%s\t%d\t%d\t\t%s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastActive(), node.getStatus()));
+                    System.out.println(String.format(" %-6d | %-12s | %-15s | %-6d | %-10d | %-6s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastActive(), node.getStatus()));
                     count++;
                 }
-                System.out.println();
-                System.out.print("# ");
+                System.out.println("------------------------------------------------------------------------");
+                System.out.print("\n# ");
             } else if ("files".equals(command2)) {
 
                 String fileList[] = fileHandler.getFileList();
 
                 System.out.println();
-                System.out.println("Number\t| File Name");
+                System.out.println(String.format(" %-6s | %-20s", "Number", "File Name"));
                 System.out.println("----------------------------------");
                 int count = 1;
                 for (String file : fileList) {
-                    System.out.println(String.format("  %d\t\t| %s", count, file));
+                    System.out.println(String.format(" %-6d | %-20s", count, file));
                     count++;
                 }
                 System.out.print("----------------------------------\n\n#");
@@ -99,13 +99,18 @@ public class ConsoleListener extends Thread {
 
                 int count = 0;
 
-                System.out.println();
+                if(searchResultSets.size()==0){
+                    System.out.print("No result for file name: " + searchHandler.getCurrentSearch() + "\n\n# ");
+                    return;
+                }
+
+                System.out.println(String.format("Search Result for [%s]:", searchHandler.getCurrentSearch()));
                 for (SearchResultSet searchResultSet : searchResultSets) {
                     Node ownerNode = searchResultSet.getOwnerNode();
-                    System.out.println(String.format("Search Result for \"%s\": From node [%s-%d] %s <%d nodes away>", searchHandler.getCurrentSearch(), ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount()));
+                    System.out.println(String.format("\tFrom node [%s-%d] %s [%d nodes away - %dms]", ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount(), searchResultSet.getQueryTime()));
                     for (String searchResult : searchResultSet.getFileNames()) {
                         count++;
-                        System.out.println(String.format("\t\t\t%d - %s", count, searchResult));
+                        System.out.println(String.format("\t\t%d - %s", count, searchResult));
                     }
                     System.out.println();
                 }
@@ -134,6 +139,8 @@ public class ConsoleListener extends Thread {
                 connectionHandler.sendMessage(leaveRequest, node);
                 logger.log(String.format("LEAVE from the node [%s]", localNode.getNodeName()));
             }
+
+            System.exit(0);
         } else if ("search".equals(command1)) {
 
             String fileName = consoleCommand.substring(command1.length() + 1);

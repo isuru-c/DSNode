@@ -9,6 +9,7 @@ public class SearchResultSet {
     private Node ownerNode;
     private String[] fileNames;
     private int hopCount;
+    private long queryTime;
 
     public SearchResultSet(Node ownerNode, String[] fileNames, int hopCount) {
         this.ownerNode = ownerNode;
@@ -26,5 +27,13 @@ public class SearchResultSet {
 
     public int getHopCount() {
         return hopCount;
+    }
+
+    public void setQueryTime(long queryTime) {
+        this.queryTime = queryTime;
+    }
+
+    public long getQueryTime() {
+        return queryTime;
     }
 }
