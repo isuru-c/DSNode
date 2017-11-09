@@ -26,7 +26,7 @@ public class MessageProcessor extends Thread {
 
     private Node localNode;
 
-    public static int maxNumOfHops;
+    public static int maxNumOfHops = 7;
 
     MessageProcessor(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, SearchHandler searchHandler, Node serverNode) {
 
@@ -37,7 +37,6 @@ public class MessageProcessor extends Thread {
 
         this.localNode = connectionHandler.getLocalNode();
 
-        this.maxNumOfHops = 7;
 
         // To start as a node in the distributed system, send the register request to the Bootstrap Server
         String regMessage = String.format("REG %s %d %s", localNode.getIp(), localNode.getPort(), localNode.getNodeName());

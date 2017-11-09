@@ -235,7 +235,7 @@ public class ConsoleListener extends Thread {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-                connectionHandler.sendMessage(searchRequest, node);
+//                connectionHandler.sendMessage(searchRequest, node);
                 logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
             }
 

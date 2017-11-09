@@ -15,6 +15,6 @@ public interface NodeControllerInterface extends Remote{
         public boolean setNode(Node node) throws ClassNotFoundException, RemoteException;
 
         public String searchItem(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
-        public String seachFound(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
+        public String searchFound(String message, Node senderNode) throws ClassNotFoundException, RemoteException;
 
 }

@@ -31,6 +31,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
         super();
         this.neighbourTable = neighbourTable;
         this.fileHandler = fileHandler;
+        this.searchHandler = searchHandler;
         this.maxNumOfHops = MessageProcessor.maxNumOfHops;
     }
 
@@ -94,7 +95,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
 
             // create connection to server
             sourceNode.setNodeController(sourceNode.getNodeControlerForNode());
-            sourceNode.getNodeController().seachFound(searchResponse,requestNode);
+            sourceNode.getNodeController().searchFound(searchResponse,requestNode);
 //            connectionHandler.sendMessage(searchResponse, requestNode);
         }
 
@@ -108,13 +109,13 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
         String searchRequest = String.format("SER %s %d %s %s %d", requestIp, requestPort, searchId, fileName, hops);
         searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
 
-        randomNode.getNodeController().seachFound(searchRequest,randomNode);
+        randomNode.getNodeController().searchFound(searchRequest,randomNode);
 //        connectionHandler.sendMessage(searchRequest, randomNode);
         return null;
     }
 
     @Override
-    public String seachFound(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
+    public String searchFound(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
         StringTokenizer tokenizeMessage = new StringTokenizer(message, " ");
 
         tokenizeMessage.nextToken(); // Length of the message, can be assigned to a variable if it is needed
