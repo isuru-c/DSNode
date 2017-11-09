@@ -51,12 +51,13 @@ public class Node {
 
     public void setStatus(String status) {
 
-        if(!this.status.equals(status)){
-            System.out.print(String.format("Neighbour [%s:%d %s] goes to %s from %s \n# ", getIp(), getPort(), getNodeName(), status, this.status));
+        if (!this.status.equals(status)) {
+            if (!((status.equals(ACTIVE_STATUS) && this.status.equals(INACTIVE_STATUS)) || (status.equals(INACTIVE_STATUS) && this.status.equals(ACTIVE_STATUS))))
+                System.out.print(String.format("Neighbour [%s:%d %s] goes to %s from %s \n# ", getIp(), getPort(), getNodeName(), status, this.status));
         }
 
         this.status = status;
-        if(getStatus().equals(ACTIVE_STATUS)){
+        if (getStatus().equals(ACTIVE_STATUS)) {
             restLastActive();
             resetLastHello();
         }

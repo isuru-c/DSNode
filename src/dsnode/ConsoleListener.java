@@ -70,25 +70,27 @@ public class ConsoleListener extends Thread {
 
             if ("neighbours".equals(command2)) {
 
-                System.out.println(String.format(" %-6s | %-12s | %-15s | %-6s | %-10s | %-6s","Number","Name","IP Address","Port","Last Seen","Status"));
-                System.out.println("------------------------------------------------------------------------");
+                System.out.println("-------------------------------------------------------------------------");
+                System.out.println(String.format("| %-6s | %-12s | %-15s | %-6s | %-10s | %-6s|","Number","Name","IP Address","Port","Last Seen","Status"));
+                System.out.println("-------------------------------------------------------------------------");
                 int count = 1;
                 for (Node node : neighbourTable.getNeighbourList()) {
-                    System.out.println(String.format(" %-6d | %-12s | %-15s | %-6d | %-10d | %-6s", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastActive(), node.getStatus()));
+                    System.out.println(String.format("| %-6d | %-12s | %-15s | %-6d | %-10d | %-6s|", count, node.getNodeName(), node.getIp(), node.getPort(), node.getLastActive(), node.getStatus()));
                     count++;
                 }
-                System.out.println("------------------------------------------------------------------------");
+                System.out.println("-------------------------------------------------------------------------");
                 System.out.print("\n# ");
             } else if ("files".equals(command2)) {
 
                 String fileList[] = fileHandler.getFileList();
 
                 System.out.println();
-                System.out.println(String.format(" %-6s | %-20s", "Number", "File Name"));
+                System.out.println("----------------------------------");
+                System.out.println(String.format("| %-6s | %-22s|", "Number", "File Name"));
                 System.out.println("----------------------------------");
                 int count = 1;
                 for (String file : fileList) {
-                    System.out.println(String.format(" %-6d | %-20s", count, file));
+                    System.out.println(String.format("| %-6d | %-22s|", count, file));
                     count++;
                 }
                 System.out.print("----------------------------------\n\n#");
@@ -105,20 +107,20 @@ public class ConsoleListener extends Thread {
                 }
 
                 System.out.println(String.format("Search Result for [%s]:\n", searchHandler.getCurrentSearch()));
-                System.out.println("--------------------------------------------------------------------------------------------");
-                System.out.println(String.format(" %-6s | %-20s | %-36s | %-9s | %-8s","Number", "File Name", "          Owner details","Hop Count", "Time(ms)"));
-                System.out.println(String.format(" %-6s | %-20s | %-10s | %-15s | %-5s | %-9s | %-8s"," ", " ","Name", "IP Address","Port", " ", " "));
-                System.out.println("--------------------------------------------------------------------------------------------");
+                System.out.println("----------------------------------------------------------------------------------------------");
+                System.out.println(String.format("| %-6s | %-20s | %-36s | %-9s | %-8s|","Number", "File Name", "___________Owner_details____________","Hop Count", "Time(ms)"));
+                System.out.println(String.format("| %-6s | %-20s | %-12s | %-13s | %-5s | %-9s | %-8s|"," ", " ","Name", "IP Address","Port", " ", " "));
+                System.out.println("----------------------------------------------------------------------------------------------");
                 for (SearchResultSet searchResultSet : searchResultSets) {
                     Node ownerNode = searchResultSet.getOwnerNode();
                     //System.out.println(String.format("\tFrom node [%s-%d] %s [%d nodes away - %dms]", ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount(), searchResultSet.getQueryTime()));
                     for (String searchResult : searchResultSet.getFileNames()) {
                         count++;
-                        System.out.println(String.format(" %-6d | %-20s | %-10s | %-15s | %-5d | %-9d | %-8d", count,searchResult,ownerNode.getNodeName(),ownerNode.getIp(), ownerNode.getPort(),searchResultSet.getHopCount(),searchResultSet.getQueryTime()));
+                        System.out.println(String.format("| %-6d | %-20s | %-12s | %-13s | %-5d | %-9d | %-8d|", count,searchResult,ownerNode.getNodeName(),ownerNode.getIp(), ownerNode.getPort(),searchResultSet.getHopCount(),searchResultSet.getQueryTime()));
                     }
                     //System.out.println();
                 }
-                System.out.println("--------------------------------------------------------------------------------------------");
+                System.out.println("----------------------------------------------------------------------------------------------");
                 System.out.print("\n# ");
 
             }
@@ -184,6 +186,14 @@ public class ConsoleListener extends Thread {
                 logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
             }
 
+        } else if("help".equals(command1)){
+            System.out.println("\nUse following commands to use the node:\n");
+            System.out.println(String.format(" %-20s - %s","show neighbours", "show the neighbour table" ));
+            System.out.println(String.format(" %-20s - %s","show files","show the files in the local node" ));
+            System.out.println(String.format(" %-20s - %s", "show search","show the results of the latest search query"));
+            System.out.println(String.format(" %-20s - %s", "search <file>","search for the <file> in the network"));
+            System.out.println(String.format(" %-20s - %s", "leave","leave the distributed system"));
+            System.out.print("\n# ");
         }
 
     }

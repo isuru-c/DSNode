@@ -154,6 +154,7 @@ class MessageProcessor extends Thread {
                     Node node = new Node(nodeIp, nodePort);
 
                     logger.log(String.format("Joining request sent to node [%s-%d]", nodeIp, nodePort));
+                    System.out.print(String.format("New neighbour added [%s-%d]\n# ", node.getIp(),node.getPort()));
                     connectionHandler.sendMessage(joinMessage, node);
 
                     node.setStatus(Node.INITIAL_STATUS);
@@ -265,6 +266,7 @@ class MessageProcessor extends Thread {
             newNeighbour.restLastActive();
             neighbourTable.addNeighbour(newNeighbour);
             logger.log(String.format("New neighbour added [%s-%d]", newNodeIp, newNodePort));
+            System.out.print(String.format("New neighbour added [%s-%d]\n# ", newNeighbour.getIp(),newNeighbour.getPort()));
 
             // Send name request for the new node
             String nameRequest = String.format("NAME %s %d", newNodeIp, newNodePort);
