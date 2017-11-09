@@ -1,9 +1,18 @@
 package dsnode.model.data;
 
+import dsnode.rmi.NodeController;
+import dsnode.rmi.NodeControllerInterface;
+
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
 /**
  * @author Isuru Chandima
  */
-public class Node {
+public class Node implements Serializable {
 
     private String ip;
     private int port;
@@ -11,6 +20,10 @@ public class Node {
     private int lastActive;
     private int lastHello;
     private String status;
+
+    // RMI Node Controller
+    private NodeControllerInterface nodeController;
+
 
     public static String INITIAL_STATUS = "Initial";
     public static String ACTIVE_STATUS = "Active";
@@ -63,6 +76,42 @@ public class Node {
         }
     }
 
+//    public NodeControllerInterface getNodeControlerForNode(String ip, int port){
+//        return getNodeControlerFromServer(ip,port);
+//    }
+
+    public NodeControllerInterface getNodeControlerForNode(){
+        try {
+            NodeControllerInterface nodeControlerForNode = getNodeControlerFromServer(ip, port);
+            nodeControlerForNode.setNode(this);
+            return nodeControlerForNode;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private NodeControllerInterface getNodeControlerFromServer(String ip, int port){
+        try {
+            String lookupString = "rmi://"+ip+":"+(port+1)+"/SWISServer";
+            NodeControllerInterface lookup = (NodeControllerInterface) Naming.lookup(lookupString);
+            return lookup;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
+
     public void setNodeName(String nodeName) {
         this.nodeName = nodeName;
     }
@@ -90,4 +139,13 @@ public class Node {
     public String getStatus() {
         return status;
     }
+
+    public NodeControllerInterface getNodeController() {
+        return nodeController;
+    }
+
+    public void setNodeController(NodeControllerInterface nodeController) {
+        this.nodeController = nodeController;
+    }
+
 }

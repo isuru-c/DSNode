@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
  * @author Isuru Chandima
  */
 @SuppressWarnings("InfiniteLoopStatement")
-class MessageProcessor extends Thread {
+public class MessageProcessor extends Thread {
 
     private static Logger logger = new Logger();
 
@@ -26,7 +26,7 @@ class MessageProcessor extends Thread {
 
     private Node localNode;
 
-    private int maxNumOfHops;
+    public static int maxNumOfHops;
 
     MessageProcessor(ConnectionHandler connectionHandler, NeighbourTable neighbourTable, FileHandler fileHandler, SearchHandler searchHandler, Node serverNode) {
 
@@ -436,7 +436,7 @@ class MessageProcessor extends Thread {
 
     }
 
-    private void handleSER(StringTokenizer tokenizeMessage, Node sourceNode) {
+    public void handleSER(StringTokenizer tokenizeMessage, Node sourceNode) {
 
         /*
          * SER message format

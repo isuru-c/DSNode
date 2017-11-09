@@ -7,6 +7,7 @@ import dsnode.model.data.Node;
 import dsnode.model.data.SearchResultSet;
 import dsnode.net.ConnectionHandler;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -71,7 +72,7 @@ public class ConsoleListener extends Thread {
             if ("neighbours".equals(command2)) {
 
                 System.out.println("-------------------------------------------------------------------------");
-                System.out.println(String.format("| %-6s | %-12s | %-15s | %-6s | %-10s | %-6s|","Number","Name","IP Address","Port","Last Seen","Status"));
+                System.out.println(String.format("| %-6s | %-12s | %-15s | %-6s | %-10s | %-6s|", "Number", "Name", "IP Address", "Port", "Last Seen", "Status"));
                 System.out.println("-------------------------------------------------------------------------");
                 int count = 1;
                 for (Node node : neighbourTable.getNeighbourList()) {
@@ -101,22 +102,22 @@ public class ConsoleListener extends Thread {
 
                 int count = 0;
 
-                if(searchResultSets.size()==0){
+                if (searchResultSets.size() == 0) {
                     System.out.print("No result for file name: " + searchHandler.getCurrentSearch() + "\n\n# ");
                     return;
                 }
 
                 System.out.println(String.format("Search Result for [%s]:\n", searchHandler.getCurrentSearch()));
                 System.out.println("----------------------------------------------------------------------------------------------");
-                System.out.println(String.format("| %-6s | %-20s | %-36s | %-9s | %-8s|","Number", "File Name", "___________Owner_details____________","Hop Count", "Time(ms)"));
-                System.out.println(String.format("| %-6s | %-20s | %-12s | %-13s | %-5s | %-9s | %-8s|"," ", " ","Name", "IP Address","Port", " ", " "));
+                System.out.println(String.format("| %-6s | %-20s | %-36s | %-9s | %-8s|", "Number", "File Name", "___________Owner_details____________", "Hop Count", "Time(ms)"));
+                System.out.println(String.format("| %-6s | %-20s | %-12s | %-13s | %-5s | %-9s | %-8s|", " ", " ", "Name", "IP Address", "Port", " ", " "));
                 System.out.println("----------------------------------------------------------------------------------------------");
                 for (SearchResultSet searchResultSet : searchResultSets) {
                     Node ownerNode = searchResultSet.getOwnerNode();
                     //System.out.println(String.format("\tFrom node [%s-%d] %s [%d nodes away - %dms]", ownerNode.getIp(), ownerNode.getPort(), ownerNode.getNodeName(), searchResultSet.getHopCount(), searchResultSet.getQueryTime()));
                     for (String searchResult : searchResultSet.getFileNames()) {
                         count++;
-                        System.out.println(String.format("| %-6d | %-20s | %-12s | %-13s | %-5d | %-9d | %-8d|", count,searchResult,ownerNode.getNodeName(),ownerNode.getIp(), ownerNode.getPort(),searchResultSet.getHopCount(),searchResultSet.getQueryTime()));
+                        System.out.println(String.format("| %-6d | %-20s | %-12s | %-13s | %-5d | %-9d | %-8d|", count, searchResult, ownerNode.getNodeName(), ownerNode.getIp(), ownerNode.getPort(), searchResultSet.getHopCount(), searchResultSet.getQueryTime()));
                     }
                     //System.out.println();
                 }
@@ -186,14 +187,59 @@ public class ConsoleListener extends Thread {
                 logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
             }
 
-        } else if("help".equals(command1)){
+        } else if ("help".equals(command1)) {
             System.out.println("\nUse following commands to use the node:\n");
-            System.out.println(String.format(" %-20s - %s","show neighbours", "show the neighbour table" ));
-            System.out.println(String.format(" %-20s - %s","show files","show the files in the local node" ));
-            System.out.println(String.format(" %-20s - %s", "show search","show the results of the latest search query"));
-            System.out.println(String.format(" %-20s - %s", "search <file>","search for the <file> in the network"));
-            System.out.println(String.format(" %-20s - %s", "leave","leave the distributed system"));
+            System.out.println(String.format(" %-20s - %s", "show neighbours", "show the neighbour table"));
+            System.out.println(String.format(" %-20s - %s", "show files", "show the files in the local node"));
+            System.out.println(String.format(" %-20s - %s", "show search", "show the results of the latest search query"));
+            System.out.println(String.format(" %-20s - %s", "search <file>", "search for the <file> in the network"));
+            System.out.println(String.format(" %-20s - %s", "leave", "leave the distributed system"));
             System.out.print("\n# ");
+        } else if ("rmi_test".equals(command1)) {
+            String fileName = consoleCommand.substring(command1.length() + 1);
+            searchHandler.newSearch(fileName.replace(' ', '_'));
+
+
+            // First search locally for the file name
+            ArrayList<String> localFileList = fileHandler.searchFiles(fileName);
+
+            if (!localFileList.isEmpty()) {
+
+                String[] fileNames = new String[localFileList.size()];
+                int count = 0;
+
+                for (String file : localFileList) {
+                    fileNames[count++] = file;
+                }
+
+                searchHandler.addSearchResult(new SearchResultSet(localNode, fileNames, 0), fileName);
+            }
+
+            Random random = new Random();
+
+            long searchId = random.nextLong();
+            fileHandler.addSearchId(String.valueOf(searchId));
+
+            // Broadcast search message for all neighbours
+
+            int hops = 0;
+
+            String searchRequest = String.format("SER %s %d %d %s %d", localNode.getIp(), localNode.getPort(), searchId, fileName, hops);
+            searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
+
+            for (Node node : neighbourTable.getActiveNeighbourList()) {
+                try {
+                    node.getNodeController().searchItem(searchRequest,localNode);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                connectionHandler.sendMessage(searchRequest, node);
+                logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
+            }
+
+
         }
 
     }

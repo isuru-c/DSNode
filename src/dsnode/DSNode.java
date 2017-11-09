@@ -6,6 +6,7 @@ import dsnode.model.SearchHandler;
 import dsnode.model.data.Node;
 import dsnode.net.ConnectionHandler;
 import dsnode.net.SocketHandler;
+import dsnode.rmi.RMIServer;
 
 import java.util.Scanner;
 
@@ -47,16 +48,22 @@ public class DSNode {
         if(!tmpName.isEmpty())
             localName = tmpName;
 
+
         ConnectionHandler connectionHandler = new SocketHandler(localName);
 
         Node localNode = connectionHandler.getLocalNode();
         Node serverNode = new Node(bServerIp, bServerPort);
+
+
 
         FileHandler fileHandler = new FileHandler();
 
         NeighbourTable neighbourTable = new NeighbourTable(localNode);
 
         SearchHandler searchHandler = new SearchHandler();
+
+        // Started RMI Server for local node
+        RMIServer.startRMIServer(localNode,neighbourTable,fileHandler,searchHandler);
 
         RouteHandler routeHandler = new RouteHandler(connectionHandler, neighbourTable, localNode);
         routeHandler.start();
