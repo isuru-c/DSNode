@@ -50,7 +50,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
     }
 
     @Override
-    public String searchItem(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
+    public void searchItem(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
         StringTokenizer tokenizeMessage = getCorrectToken(message);
         if (neighbourTable.isExistingNeighbour(sourceNode)) {
             Node neighbourNode = neighbourTable.getNeighbourNode(sourceNode);
@@ -77,7 +77,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
 
         if (hops > maxNumOfHops) {
             // SER message has reached the maximum number of hops it can be forwarded.
-            return null;
+            return;
         }
 
         if (fileHandler.isNewSearchId(searchId)) {
@@ -105,18 +105,18 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
         Node randomNode = neighbourTable.getRandomNeighbour(sourceNode);
 
         if (randomNode == null)
-            return null;
+            return;
 
         String searchRequest = String.format("SER %s %d %s %s %d", requestIp, requestPort, searchId, fileName, hops);
         searchRequest = String.format("%04d %s", (searchRequest.length() + 5), searchRequest);
 
         randomNode.getNodeController().searchItem(searchRequest,localNode);
 //        connectionHandler.sendMessage(searchRequest, randomNode);
-        return null;
+        return;
     }
 
     @Override
-    public String searchFound(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
+    public void searchFound(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
         StringTokenizer tokenizeMessage = getCorrectToken(message);
 
         if (neighbourTable.isExistingNeighbour(sourceNode)) {
@@ -147,7 +147,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
             }
             searchHandler.addSearchResult(new SearchResultSet(responseNode, fileNames, hopCount), searchFileName);
         }
-        return null;
+        return;
     }
 
     @Override
@@ -264,7 +264,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
             return;
 
         // Send NAMEOK respond to the NAME requester
-        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, localNode.getNodeName());
+        String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, neighbourTable.getLocalNode().getNodeName());
         nameResponse = String.format("%04d %s", (nameResponse.length() + 5), nameResponse);
 
         sourceNode.setNodeController(sourceNode.getNodeControlerForNode());

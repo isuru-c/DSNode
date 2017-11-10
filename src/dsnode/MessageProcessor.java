@@ -156,6 +156,12 @@ public class MessageProcessor extends Thread {
                     logger.log(String.format("Joining request sent to node [%s-%d]", nodeIp, nodePort));
                     System.out.print(String.format("New neighbour added [%s-%d]\n# ", node.getIp(),node.getPort()));
 
+                    node.setStatus(Node.INITIAL_STATUS);
+                    neighbourTable.addNeighbour(node);
+
+                    count++;
+
+
                     node.setNodeController(node.getNodeControlerForNode());
                     try {
                         node.getNodeController().joinAsNeighbour(joinMessage);
@@ -166,10 +172,7 @@ public class MessageProcessor extends Thread {
                     }
 //                    connectionHandler.sendMessage(joinMessage, node);
 
-                    node.setStatus(Node.INITIAL_STATUS);
-                    neighbourTable.addNeighbour(node);
 
-                    count++;
                 }
             }
         }

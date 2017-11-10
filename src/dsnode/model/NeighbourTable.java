@@ -105,4 +105,8 @@ public class NeighbourTable {
 
         return randomNode;
     }
+
+    public Node getLocalNode(){
+        return this.localNode;
+    }
 }
