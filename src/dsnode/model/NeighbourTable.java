@@ -82,6 +82,7 @@ public class NeighbourTable {
         if (neighbourCount == 0)
             return null;
 
+
         Random rand = new Random();
         int randomNumber = rand.nextInt(neighbourCount);
 
@@ -98,6 +99,10 @@ public class NeighbourTable {
 
             if (randomNode == null)
                 return null;
+
+            if(getNeighbourList().size()==1 && node.getIp().equals(randomNode.getIp())){
+                return null;
+            }
 
             if (!(node.getIp().equals(randomNode.getIp()) && node.getPort() == randomNode.getPort()))
                 randomNodeFound = true;
