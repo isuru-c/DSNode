@@ -55,7 +55,6 @@ public class DSNode {
         Node serverNode = new Node(bServerIp, bServerPort);
 
 
-
         FileHandler fileHandler = new FileHandler();
 
         NeighbourTable neighbourTable = new NeighbourTable(localNode);

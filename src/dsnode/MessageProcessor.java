@@ -162,15 +162,15 @@ public class MessageProcessor extends Thread {
                     count++;
 
 
-                    node.setNodeController(node.getNodeControlerForNode());
+                    /*node.setNodeController(node.getNodeControlerForNode());
                     try {
                         node.getNodeController().joinAsNeighbour(joinMessage);
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     } catch (RemoteException e) {
                         e.printStackTrace();
-                    }
-//                    connectionHandler.sendMessage(joinMessage, node);
+                    }*/
+                    connectionHandler.sendMessage(joinMessage, node);
 
 
                 }
@@ -225,14 +225,14 @@ public class MessageProcessor extends Thread {
         String leaveResponseMessage = String.format("LEAVEOK %d", value);
         leaveResponseMessage = String.format("%04d %s", (leaveResponseMessage.length() + 5), leaveResponseMessage);
 
-        try {
-            neighbour.getNodeController().leaveResponse(leaveResponseMessage,localNode);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-//        connectionHandler.sendMessage(leaveResponseMessage, neighbour);
+//        try {
+//            neighbour.getNodeController().leaveResponse(leaveResponseMessage,localNode);
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (RemoteException e) {
+//            e.printStackTrace();
+//        }
+        connectionHandler.sendMessage(leaveResponseMessage, neighbour);
     }
 
     private void handleLEAVEOK(StringTokenizer tokenizeMessage, Node sourceNode) {
@@ -278,15 +278,15 @@ public class MessageProcessor extends Thread {
         String responseMessage = String.format("JOINOK %d", value);
         responseMessage = String.format("%04d %s", (responseMessage.length() + 5), responseMessage);
 
-        newNeighbour.setNodeController(newNeighbour.getNodeControlerForNode());
+        /*newNeighbour.setNodeController(newNeighbour.getNodeControlerForNode());
         try {
             newNeighbour.getNodeController().joinResponse(responseMessage,localNode);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
             e.printStackTrace();
-        }
-//        connectionHandler.sendMessage(responseMessage, newNeighbour);
+        }*/
+        connectionHandler.sendMessage(responseMessage, newNeighbour);
 
         if (value == 0) {
             newNeighbour.setStatus(Node.ACTIVE_STATUS);
@@ -299,14 +299,14 @@ public class MessageProcessor extends Thread {
             String nameRequest = String.format("NAME %s %d", newNodeIp, newNodePort);
             nameRequest = String.format("%04d %s", (nameRequest.length() + 5), nameRequest);
 
-            try {
+            /*try {
                 newNeighbour.getNodeController().getName(nameRequest,localNode);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (RemoteException e) {
                 e.printStackTrace();
-            }
-//            connectionHandler.sendMessage(nameRequest, newNeighbour);
+            }*/
+            connectionHandler.sendMessage(nameRequest, newNeighbour);
             logger.log(String.format("NAME request sent [%s-%d]", newNodeIp, newNodePort));
         }
     }
@@ -342,15 +342,15 @@ public class MessageProcessor extends Thread {
         String nameRequest = String.format("NAME %s %d", sourceNode.getIp(), sourceNode.getPort());
         nameRequest = String.format("%04d %s", (nameRequest.length() + 5), nameRequest);
 
-        sourceNode.setNodeController(sourceNode.getNodeControlerForNode());
+        /*sourceNode.setNodeController(sourceNode.getNodeControlerForNode());
         try {
             sourceNode.getNodeController().getName(nameRequest,localNode);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
             e.printStackTrace();
-        }
-//        connectionHandler.sendMessage(nameRequest, sourceNode);
+        }*/
+        connectionHandler.sendMessage(nameRequest, sourceNode);
         logger.log(String.format("NAME request sent [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
     }
 
@@ -373,7 +373,7 @@ public class MessageProcessor extends Thread {
         String nameResponse = String.format("NAMEOK %s %d %s", nodeIp, nodePort, localNode.getNodeName());
         nameResponse = String.format("%04d %s", (nameResponse.length() + 5), nameResponse);
 
-        sourceNode.setNodeController(sourceNode.getNodeControlerForNode());
+        /*sourceNode.setNodeController(sourceNode.getNodeControlerForNode());
         try {
             sourceNode.getNodeController().nameResponse(nameResponse,localNode);
         } catch (ClassNotFoundException e) {
@@ -381,8 +381,8 @@ public class MessageProcessor extends Thread {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-//        connectionHandler.sendMessage(nameResponse, sourceNode);
+*/
+        connectionHandler.sendMessage(nameResponse, sourceNode);
         logger.log(String.format("NAMEOK respond sent to [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
 
     }
@@ -444,14 +444,14 @@ public class MessageProcessor extends Thread {
             String helloOkMessage = String.format("HELLOOK %s %d %s %d", neighbourNode.getIp(), neighbourNode.getPort(), targetNode.getIp(), targetNode.getPort());
             helloOkMessage = String.format("%04d %s", (helloOkMessage.length() + 5), helloOkMessage);
 
-            try {
-                neighbourNode.getNodeController().helloResponse(helloOkMessage);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-//            connectionHandler.sendMessage(helloOkMessage, neighbourNode);
+//            try {
+//                neighbourNode.getNodeController().helloResponse(helloOkMessage);
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+            connectionHandler.sendMessage(helloOkMessage, neighbourNode);
 
         }
     }

@@ -145,15 +145,15 @@ public class ConsoleListener extends Thread {
                 String leaveRequest = String.format("LEAVE %s %d", localNode.getIp(), localNode.getPort());
                 leaveRequest = String.format("%04d %s", (leaveRequest.length() + 5), leaveRequest);
 
-                try {
-                    node.getNodeController().leaveAsNeighbour(leaveRequest);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    node.getNodeController().leaveAsNeighbour(leaveRequest);
+//                } catch (ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
 
-//                connectionHandler.sendMessage(leaveRequest, node);
+                connectionHandler.sendMessage(leaveRequest, node);
                 logger.log(String.format("LEAVE from the node [%s]", localNode.getNodeName()));
             }
 
@@ -240,9 +240,9 @@ public class ConsoleListener extends Thread {
                 try {
                     node.getNodeController().searchItem(searchRequest,localNode);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    logger.log(String.format("RMI Server can't find : "+node.getIp()+" : "+node.getPort()));
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    logger.log(String.format("RMI Server can't find : "+node.getIp()+" : "+node.getPort()));
                 }
 //                connectionHandler.sendMessage(searchRequest, node);
                 logger.log(String.format("SER request sent to [%s]", node.getNodeName()));

@@ -152,7 +152,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
 
     @Override
     public void joinAsNeighbour(String message) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
+        /*StringTokenizer tokenizeMessage = getCorrectToken(message);
 
         if (tokenizeMessage.countTokens() < 2) {
             logger.log("Incomplete message for JOIN request");
@@ -193,12 +193,12 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
             newNeighbour.getNodeController().getName(nameRequest,localNode);
 //            connectionHandler.sendMessage(nameRequest, newNeighbour);
             logger.log(String.format("NAME request sent [%s-%d]", newNodeIp, newNodePort));
-        }
+        }*/
     }
 
     @Override
     public void joinResponse(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
+        /*StringTokenizer tokenizeMessage = getCorrectToken(message);
 
         if (tokenizeMessage.countTokens() < 1) {
             logger.log("Incomplete message for JOINOK respond...!");
@@ -234,7 +234,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
         sourceNode.getNodeController().getName(nameRequest,localNode);
 
 //        connectionHandler.sendMessage(nameRequest, sourceNode);
-        logger.log(String.format("NAME request sent [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
+        logger.log(String.format("NAME request sent [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));*/
     }
 
     private StringTokenizer getCorrectToken(String message){
@@ -248,7 +248,7 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
 
     @Override
     public void getName(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
+   /*     StringTokenizer tokenizeMessage = getCorrectToken(message);
 
         if (tokenizeMessage.countTokens() < 2) {
             logger.log("Incomplete message for NAME request...!");
@@ -270,34 +270,34 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
         sourceNode.setNodeController(sourceNode.getNodeControlerForNode());
         sourceNode.getNodeController().nameResponse(nameResponse,localNode);
 //        connectionHandler.sendMessage(nameResponse, sourceNode);
-        logger.log(String.format("NAMEOK respond sent to [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));
+        logger.log(String.format("NAMEOK respond sent to [%s-%d]", sourceNode.getIp(), sourceNode.getPort()));*/
 
     }
 
     @Override
     public void nameResponse(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
-
-        if (tokenizeMessage.countTokens() < 3) {
-            logger.log("Incomplete message for NAMEOK response...!");
-            return;
-        }
-
-        String nodeIp = tokenizeMessage.nextToken();
-        int nodePort = Integer.valueOf(tokenizeMessage.nextToken());
-        String nodeName = tokenizeMessage.nextToken();
-        Node node = new Node(nodeIp, nodePort, nodeName);
-
-        if (neighbourTable.isExistingNeighbour(node)) {
-            Node neighbourNode = neighbourTable.getNeighbourNode(node);
-            neighbourNode.setNodeName(nodeName);
-            logger.log(String.format("Name updated in the node [%s-%d]", nodeIp, nodePort));
-        }
+//        StringTokenizer tokenizeMessage = getCorrectToken(message);
+//
+//        if (tokenizeMessage.countTokens() < 3) {
+//            logger.log("Incomplete message for NAMEOK response...!");
+//            return;
+//        }
+//
+//        String nodeIp = tokenizeMessage.nextToken();
+//        int nodePort = Integer.valueOf(tokenizeMessage.nextToken());
+//        String nodeName = tokenizeMessage.nextToken();
+//        Node node = new Node(nodeIp, nodePort, nodeName);
+//
+//        if (neighbourTable.isExistingNeighbour(node)) {
+//            Node neighbourNode = neighbourTable.getNeighbourNode(node);
+//            neighbourNode.setNodeName(nodeName);
+//            logger.log(String.format("Name updated in the node [%s-%d]", nodeIp, nodePort));
+//        }
     }
 
     @Override
     public void leaveAsNeighbour(String message) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
+        /*StringTokenizer tokenizeMessage = getCorrectToken(message);
 
         if (tokenizeMessage.countTokens() < 2) {
             logger.log("Incomplete message for LEAVE request...!");
@@ -326,81 +326,81 @@ public class NodeController extends UnicastRemoteObject implements NodeControlle
         neighbour.setNodeController(neighbour.getNodeControlerForNode());
         neighbour.getNodeController().leaveResponse(leaveResponseMessage,localNode);
 
-//        connectionHandler.sendMessage(leaveResponseMessage, neighbour);
+//        connectionHandler.sendMessage(leaveResponseMessage, neighbour);*/
     }
 
     @Override
     public void leaveResponse(String message, Node sourceNode) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
-
-        if (tokenizeMessage.countTokens() < 1) {
-            logger.log("Incomplete message for LEAVEOK response...!");
-            return;
-        }
-
-        String value = tokenizeMessage.nextToken();
-
-        if ("0".equals(value)) {
-            // Successful leaving in remote node, remove neighbour node from the routing table
-            neighbourTable.removeNeighbour(sourceNode);
-
-        } else if ("9999".equals(value)) {
-            // Error while leaving from neighbour node
-            logger.log("Error in LEAVEOK message response...!");
-        }
+//        StringTokenizer tokenizeMessage = getCorrectToken(message);
+//
+//        if (tokenizeMessage.countTokens() < 1) {
+//            logger.log("Incomplete message for LEAVEOK response...!");
+//            return;
+//        }
+//
+//        String value = tokenizeMessage.nextToken();
+//
+//        if ("0".equals(value)) {
+//            // Successful leaving in remote node, remove neighbour node from the routing table
+//            neighbourTable.removeNeighbour(sourceNode);
+//
+//        } else if ("9999".equals(value)) {
+//            // Error while leaving from neighbour node
+//            logger.log("Error in LEAVEOK message response...!");
+//        }
 
     }
 
     @Override
     public void hello(String message) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
-
-        if (tokenizeMessage.countTokens() < 4) {
-            logger.log("Incomplete message for HELLO request...!");
-            return;
-        }
-
-        String targetIp = tokenizeMessage.nextToken();
-        int targetPort = Integer.valueOf(tokenizeMessage.nextToken());
-        Node targetNode = new Node(targetIp, targetPort);
-
-        String requestIp = tokenizeMessage.nextToken();
-        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
-        Node requestNode = new Node(requestIp, requestPort);
-
-        if (neighbourTable.isLocalNode(targetNode) && neighbourTable.isExistingNeighbour(requestNode)) {
-            Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
-            neighbourNode.setStatus(Node.ACTIVE_STATUS);
-
-            String helloOkMessage = String.format("HELLOOK %s %d %s %d", neighbourNode.getIp(), neighbourNode.getPort(), targetNode.getIp(), targetNode.getPort());
-            helloOkMessage = String.format("%04d %s", (helloOkMessage.length() + 5), helloOkMessage);
-
-            neighbourNode.getNodeController().helloResponse(helloOkMessage);
-//            connectionHandler.sendMessage(helloOkMessage, neighbourNode);
-        }
+//        StringTokenizer tokenizeMessage = getCorrectToken(message);
+//
+//        if (tokenizeMessage.countTokens() < 4) {
+//            logger.log("Incomplete message for HELLO request...!");
+//            return;
+//        }
+//
+//        String targetIp = tokenizeMessage.nextToken();
+//        int targetPort = Integer.valueOf(tokenizeMessage.nextToken());
+//        Node targetNode = new Node(targetIp, targetPort);
+//
+//        String requestIp = tokenizeMessage.nextToken();
+//        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
+//        Node requestNode = new Node(requestIp, requestPort);
+//
+//        if (neighbourTable.isLocalNode(targetNode) && neighbourTable.isExistingNeighbour(requestNode)) {
+//            Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
+//            neighbourNode.setStatus(Node.ACTIVE_STATUS);
+//
+//            String helloOkMessage = String.format("HELLOOK %s %d %s %d", neighbourNode.getIp(), neighbourNode.getPort(), targetNode.getIp(), targetNode.getPort());
+//            helloOkMessage = String.format("%04d %s", (helloOkMessage.length() + 5), helloOkMessage);
+//
+//            neighbourNode.getNodeController().helloResponse(helloOkMessage);
+////            connectionHandler.sendMessage(helloOkMessage, neighbourNode);
+//        }
     }
 
     @Override
     public void helloResponse(String message) throws ClassNotFoundException, RemoteException {
-        StringTokenizer tokenizeMessage = getCorrectToken(message);
-
-        if (tokenizeMessage.countTokens() < 4) {
-            logger.log("Incomplete message for HELLOOK response...!");
-            return;
-        }
-
-        String targetIp = tokenizeMessage.nextToken();
-        int targetPort = Integer.valueOf(tokenizeMessage.nextToken());
-        Node targetNode = new Node(targetIp, targetPort);
-
-        String requestIp = tokenizeMessage.nextToken();
-        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
-        Node requestNode = new Node(requestIp, requestPort);
-
-        if (neighbourTable.isLocalNode(targetNode) && neighbourTable.isExistingNeighbour(requestNode)) {
-            Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
-            neighbourNode.setStatus(Node.ACTIVE_STATUS);
-        }
+//        StringTokenizer tokenizeMessage = getCorrectToken(message);
+//
+//        if (tokenizeMessage.countTokens() < 4) {
+//            logger.log("Incomplete message for HELLOOK response...!");
+//            return;
+//        }
+//
+//        String targetIp = tokenizeMessage.nextToken();
+//        int targetPort = Integer.valueOf(tokenizeMessage.nextToken());
+//        Node targetNode = new Node(targetIp, targetPort);
+//
+//        String requestIp = tokenizeMessage.nextToken();
+//        int requestPort = Integer.valueOf(tokenizeMessage.nextToken());
+//        Node requestNode = new Node(requestIp, requestPort);
+//
+//        if (neighbourTable.isLocalNode(targetNode) && neighbourTable.isExistingNeighbour(requestNode)) {
+//            Node neighbourNode = neighbourTable.getNeighbourNode(requestNode);
+//            neighbourNode.setStatus(Node.ACTIVE_STATUS);
+//        }
     }
 
 
