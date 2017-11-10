@@ -69,7 +69,7 @@ public class ConsoleListener extends Thread {
                 command2 = st.nextToken();
             else return;
 
-            if ("neighbours".equals(command2)) {
+            if ("neighbours".equals(command2) || "nei".equals(command2)) {
 
                 System.out.println("-------------------------------------------------------------------------");
                 System.out.println(String.format("| %-6s | %-12s | %-15s | %-6s | %-10s | %-6s|", "Number", "Name", "IP Address", "Port", "Last Seen", "Status"));
@@ -158,7 +158,7 @@ public class ConsoleListener extends Thread {
             }
 
             System.exit(0);
-        } else if ("search".equals(command1)) {
+        } else if ("search_socket".equals(command1)) {
 
             String fileName = consoleCommand.substring(command1.length() + 1);
             searchHandler.newSearch(fileName.replace(' ', '_'));
@@ -204,7 +204,7 @@ public class ConsoleListener extends Thread {
             System.out.println(String.format(" %-20s - %s", "search <file>", "search for the <file> in the network"));
             System.out.println(String.format(" %-20s - %s", "leave", "leave the distributed system"));
             System.out.print("\n# ");
-        } else if ("rmi_test".equals(command1)) {
+        } else if ("search".equals(command1)) {
             String fileName = consoleCommand.substring(command1.length() + 1);
             searchHandler.newSearch(fileName.replace(' ', '_'));
 
@@ -243,6 +243,8 @@ public class ConsoleListener extends Thread {
                     logger.log(String.format("RMI Server can't find : "+node.getIp()+" : "+node.getPort()));
                 } catch (RemoteException e) {
                     logger.log(String.format("RMI Server can't find : "+node.getIp()+" : "+node.getPort()));
+                }catch (Exception e){
+
                 }
 //                connectionHandler.sendMessage(searchRequest, node);
                 logger.log(String.format("SER request sent to [%s]", node.getNodeName()));
